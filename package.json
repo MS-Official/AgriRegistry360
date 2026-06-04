@@ -1,0 +1,20 @@
+{
+  "name": "agriregistry360",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Integrated Farm & Farmer Registry demo",
+  "scripts": {
+    "dev": "concurrently \"npm run dev --workspace backend\" \"npm start --workspace frontend\"",
+    "backend": "npm run dev --workspace backend",
+    "frontend": "npm start --workspace frontend",
+    "install:all": "npm install --workspaces",
+    "test": "npm run test --workspace backend && npm run build --workspace frontend"
+  },
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
