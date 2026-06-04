@@ -2,6 +2,7 @@ import cors from 'cors';
 import express from 'express';
 import { config } from './config/env.js';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
+import { cropRouter } from './routes/crop.routes.js';
 import { farmRouter } from './routes/farm.routes.js';
 import { farmerRouter } from './routes/farmer.routes.js';
 
@@ -20,8 +21,9 @@ export function createApp() {
 
   app.use('/api/farmers', farmerRouter);
   app.use('/api/farms', farmRouter);
+  app.use('/api/crops', cropRouter);
 
-  // TODO: Add future crop, eligibility, program, Odoo, WSO2, and report routes.
+  // TODO: Add future eligibility, program, Odoo, OpenG2P, WSO2, and report routes.
   app.use(notFoundHandler);
   app.use(errorHandler);
 

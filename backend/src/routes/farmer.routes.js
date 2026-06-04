@@ -1,4 +1,5 @@
 import express from 'express';
+import { getCropsByFarmerId } from '../controllers/crop.controller.js';
 import {
   getFarmerById,
   getFarmers,
@@ -13,6 +14,7 @@ export const farmerRouter = express.Router();
 farmerRouter.post('/register', registerFarmer);
 farmerRouter.get('/', getFarmers);
 farmerRouter.get('/:farmerId/farms', getFarmsByFarmerId);
+farmerRouter.get('/:farmerId/crops', getCropsByFarmerId);
 farmerRouter.get('/:id', getFarmerById);
 farmerRouter.put('/:id', updateFarmer);
 farmerRouter.patch('/:id/verify', verifyFarmer);

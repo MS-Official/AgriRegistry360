@@ -1,6 +1,7 @@
 import { createApp } from './app.js';
 import { connectDb } from './config/db.js';
 import { config } from './config/env.js';
+import { seedDemoCrop } from './seed/demoCrop.seed.js';
 import { seedDemoFarm } from './seed/demoFarm.seed.js';
 import { seedDemoFarmer } from './seed/demoFarmer.seed.js';
 
@@ -13,6 +14,10 @@ async function startServer() {
 
   if (config.seedDemoFarm) {
     await seedDemoFarm();
+  }
+
+  if (config.seedDemoCrop) {
+    await seedDemoCrop();
   }
 
   const app = createApp();

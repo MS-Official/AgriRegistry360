@@ -14,6 +14,8 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
           <a routerLink="/farmers" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Farmer List</a>
           <a routerLink="/farms/register" routerLinkActive="active">Register Farm / Land</a>
           <a routerLink="/farms" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Farm / Land List</a>
+          <a routerLink="/crops/register" routerLinkActive="active">Register Crop</a>
+          <a routerLink="/crops" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Crop List</a>
         </nav>
       </header>
       <main class="content">

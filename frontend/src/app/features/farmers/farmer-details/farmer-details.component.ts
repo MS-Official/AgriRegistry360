@@ -1,6 +1,9 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { cropTypeLabel } from '../../crops/crop-labels';
+import { Crop } from '../../crops/crop.model';
+import { CropService } from '../../crops/crop.service';
 import { FarmService } from '../../farms/farm.service';
 import { Farm } from '../../farms/farm.model';
 import { landSizeUnitLabel, ownershipTypeLabel } from '../../farms/farm-labels';
@@ -125,6 +128,30 @@ import {
         </div>
       </section>
 
+      <section style="margin-top: 22px;">
+        <div class="page-title" style="margin-bottom: 12px;">
+          <div>
+            <h1 style="font-size: 20px;">Crop Summary</h1>
+            <p>High-level crop status across this farmer's registered farms.</p>
+          </div>
+        </div>
+
+        <div class="grid details-grid">
+          <div class="detail-item">
+            <div class="detail-label">Total Registered Crops</div>
+            <div class="detail-value">{{ linkedCrops.length }}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Main Crop Types</div>
+            <div class="detail-value">{{ cropTypeSummary || '-' }}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Pending Crop Verifications</div>
+            <div class="detail-value">{{ pendingCropVerifications }}</div>
+          </div>
+        </div>
+      </section>
+
       <div class="grid placeholder-grid">
         <div class="placeholder">
           <strong>Linked Farms</strong>
@@ -153,6 +180,7 @@ import {
 export class FarmerDetailsComponent implements OnInit {
   farmer?: Farmer;
   linkedFarms: Farm[] = [];
+  linkedCrops: Crop[] = [];
   errorMessage = '';
 
   readonly farmerTypeLabel = farmerTypeLabel;
@@ -164,8 +192,18 @@ export class FarmerDetailsComponent implements OnInit {
   constructor(
     private readonly route: ActivatedRoute,
     private readonly farmerService: FarmerService,
-    private readonly farmService: FarmService
+    private readonly farmService: FarmService,
+    private readonly cropService: CropService
   ) {}
+
+  get cropTypeSummary(): string {
+    const cropTypes = Array.from(new Set(this.linkedCrops.map((crop) => cropTypeLabel(crop.cropType))));
+    return cropTypes.join(', ');
+  }
+
+  get pendingCropVerifications(): number {
+    return this.linkedCrops.filter((crop) => crop.verificationStatus === 'PENDING_VERIFICATION').length;
+  }
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
@@ -179,6 +217,7 @@ export class FarmerDetailsComponent implements OnInit {
       next: (farmer) => {
         this.farmer = farmer;
         this.loadLinkedFarms(farmer._id);
+        this.loadLinkedCrops(farmer._id);
       },
       error: (error) => {
         this.errorMessage = error.error?.message || 'Unable to load farmer details.';
@@ -193,6 +232,17 @@ export class FarmerDetailsComponent implements OnInit {
       },
       error: (error) => {
         this.errorMessage = error.error?.message || 'Unable to load linked farms.';
+      },
+    });
+  }
+
+  private loadLinkedCrops(farmerId: string): void {
+    this.cropService.getCropsByFarmerId(farmerId).subscribe({
+      next: (crops) => {
+        this.linkedCrops = crops;
+      },
+      error: (error) => {
+        this.errorMessage = error.error?.message || 'Unable to load linked crops.';
       },
     });
   }

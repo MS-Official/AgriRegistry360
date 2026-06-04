@@ -9,4 +9,5 @@ export const config = {
   corsOrigin: process.env.CORS_ORIGIN || 'http://localhost:4200',
   seedDemoFarmer: process.env.SEED_DEMO_FARMER !== 'false',
   seedDemoFarm: process.env.SEED_DEMO_FARM !== 'false',
+  seedDemoCrop: process.env.SEED_DEMO_CROP !== 'false',
 };

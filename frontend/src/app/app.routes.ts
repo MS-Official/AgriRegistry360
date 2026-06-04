@@ -1,4 +1,7 @@
 import { Routes } from '@angular/router';
+import { CropDetailsComponent } from './features/crops/crop-details/crop-details.component';
+import { CropListComponent } from './features/crops/crop-list/crop-list.component';
+import { CropRegistrationComponent } from './features/crops/crop-registration/crop-registration.component';
 import { FarmerDetailsComponent } from './features/farmers/farmer-details/farmer-details.component';
 import { FarmerListComponent } from './features/farmers/farmer-list/farmer-list.component';
 import { FarmerRegistrationComponent } from './features/farmers/farmer-registration/farmer-registration.component';
@@ -14,4 +17,7 @@ export const routes: Routes = [
   { path: 'farms', component: FarmListComponent },
   { path: 'farms/register', component: FarmRegistrationComponent },
   { path: 'farms/:id', component: FarmDetailsComponent },
+  { path: 'crops', component: CropListComponent },
+  { path: 'crops/register', component: CropRegistrationComponent },
+  { path: 'crops/:id', component: CropDetailsComponent },
 ];

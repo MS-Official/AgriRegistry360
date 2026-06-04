@@ -1,6 +1,15 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import {
+  cropStatusLabel,
+  cropTypeLabel,
+  cultivationAreaUnitLabel,
+  expectedYieldUnitLabel,
+  seasonLabel,
+} from '../../crops/crop-labels';
+import { Crop } from '../../crops/crop.model';
+import { CropService } from '../../crops/crop.service';
 import { verificationStatusClass, verificationStatusLabel } from '../../farmers/farmer-labels';
 import {
   farmStatusLabel,
@@ -101,6 +110,60 @@ import { FarmService } from '../farm.service';
         </div>
       </div>
 
+      <section style="margin-top: 22px;">
+        <div class="page-title" style="margin-bottom: 12px;">
+          <div>
+            <h1 style="font-size: 20px;">Linked Crops</h1>
+            <p>Crop records registered under this farm or land record.</p>
+          </div>
+          <a class="button secondary" routerLink="/crops/register">Register Crop</a>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Crop Code</th>
+                <th>Crop Type</th>
+                <th>Season</th>
+                <th>Season Year</th>
+                <th>Cultivation Area</th>
+                <th>Expected Yield</th>
+                <th>Crop Status</th>
+                <th>Verification Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let linkedCrop of linkedCrops">
+                <td>
+                  <a [routerLink]="['/crops', linkedCrop._id]">{{ linkedCrop.cropCode }}</a>
+                </td>
+                <td>{{ cropTypeLabel(linkedCrop.cropType) }}</td>
+                <td>{{ seasonLabel(linkedCrop.season) }}</td>
+                <td>{{ linkedCrop.seasonYear }}</td>
+                <td>
+                  {{ linkedCrop.cultivationArea }}
+                  {{ cultivationAreaUnitLabel(linkedCrop.cultivationAreaUnit) }}
+                </td>
+                <td>
+                  {{ linkedCrop.expectedYield }}
+                  {{ expectedYieldUnitLabel(linkedCrop.expectedYieldUnit) }}
+                </td>
+                <td>{{ cropStatusLabel(linkedCrop.cropStatus) }}</td>
+                <td>
+                  <span class="badge" [ngClass]="verificationStatusClass(linkedCrop.verificationStatus)">
+                    {{ verificationStatusLabel(linkedCrop.verificationStatus) }}
+                  </span>
+                </td>
+              </tr>
+              <tr *ngIf="linkedCrops.length === 0">
+                <td colspan="8">No crop records registered yet.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
       <div class="grid placeholder-grid">
         <div class="placeholder">
           <strong>Registered Crops</strong>
@@ -124,6 +187,7 @@ import { FarmService } from '../farm.service';
 })
 export class FarmDetailsComponent implements OnInit {
   farm?: Farm;
+  linkedCrops: Crop[] = [];
   errorMessage = '';
 
   readonly ownershipTypeLabel = ownershipTypeLabel;
@@ -133,10 +197,16 @@ export class FarmDetailsComponent implements OnInit {
   readonly farmStatusLabel = farmStatusLabel;
   readonly verificationStatusLabel = verificationStatusLabel;
   readonly verificationStatusClass = verificationStatusClass;
+  readonly cropTypeLabel = cropTypeLabel;
+  readonly seasonLabel = seasonLabel;
+  readonly cultivationAreaUnitLabel = cultivationAreaUnitLabel;
+  readonly expectedYieldUnitLabel = expectedYieldUnitLabel;
+  readonly cropStatusLabel = cropStatusLabel;
 
   constructor(
     private readonly route: ActivatedRoute,
-    private readonly farmService: FarmService
+    private readonly farmService: FarmService,
+    private readonly cropService: CropService
   ) {}
 
   ngOnInit(): void {
@@ -150,11 +220,22 @@ export class FarmDetailsComponent implements OnInit {
     this.farmService.getFarmById(id).subscribe({
       next: (farm) => {
         this.farm = farm;
+        this.loadLinkedCrops(farm._id);
       },
       error: (error) => {
         this.errorMessage = error.error?.message || 'Unable to load farm/land details.';
       },
     });
   }
-}
 
+  private loadLinkedCrops(farmId: string): void {
+    this.cropService.getCropsByFarmId(farmId).subscribe({
+      next: (crops) => {
+        this.linkedCrops = crops;
+      },
+      error: (error) => {
+        this.errorMessage = error.error?.message || 'Unable to load linked crops.';
+      },
+    });
+  }
+}

@@ -35,7 +35,7 @@ WSO2 API Manager Exposure
 | Farmer Details | View a farmer profile and future linked data |
 | Farmer Verification | Verify or reject registered farmers |
 | Farm Registration | Register farm or land records under a farmer |
-| Crop Registration | Future crop registration |
+| Crop Registration | Register crop records under a farm or land record |
 | Eligibility Check | Future subsidy eligibility workflow |
 | Program Enrollment | Future program enrollment workflow |
 | Odoo Inventory / Distribution View | Future inventory reservation and distribution view |
@@ -57,7 +57,13 @@ WSO2 API Manager Exposure
 | GET | `/api/farmers/:farmerId/farms` | Implemented in Farm / Land Registry scope |
 | PUT | `/api/farms/:id` | Implemented in Farm / Land Registry scope |
 | PATCH | `/api/farms/:id/verify` | Implemented in Farm / Land Registry scope |
-| POST | `/api/crops/register` | Future module |
+| POST | `/api/crops/register` | Implemented in Crop Registry scope |
+| GET | `/api/crops` | Implemented in Crop Registry scope |
+| GET | `/api/crops/:id` | Implemented in Crop Registry scope |
+| GET | `/api/farms/:farmId/crops` | Implemented in Crop Registry scope |
+| GET | `/api/farmers/:farmerId/crops` | Implemented in Crop Registry scope |
+| PUT | `/api/crops/:id` | Implemented in Crop Registry scope |
+| PATCH | `/api/crops/:id/verify` | Implemented in Crop Registry scope |
 | POST | `/api/eligibility/check` | Future module |
 | POST | `/api/programs/enroll` | Future module |
 | POST | `/api/odoo/inventory/reserve` | Future integration |
@@ -86,7 +92,7 @@ WSO2 API Manager Exposure
 - Farmer verification or rejection
 - Demo seed data for Mohamed Ameen
 
-### Farm / Land Registry: Current Module / In Progress
+### Farm / Land Registry: Completed
 
 - Farm / land registration under an existing farmer
 - Farm list with search
@@ -96,9 +102,19 @@ WSO2 API Manager Exposure
 - Linked farms shown on Farmer Details
 - Demo farm seed data for Mohamed Ameen
 
+### Crop Registry: Current Module / In Progress
+
+- Crop registration under an existing farm / land record
+- Crop list with search
+- Crop details
+- Crop update API
+- Crop verification or rejection
+- Linked crops shown on Farm Details
+- Farmer Details crop summary
+- Demo crop seed data for Mohamed Ameen's demo farm
+
 ## Future Modules
 
-- Crop Registry
 - Eligibility Check
 - Program Enrollment
 - Odoo Inventory Reservation / Distribution
