@@ -336,6 +336,23 @@ interface DemoReadiness {
       </div>
     </section>
 
+    <section class="panel accent-panel">
+      <h2 style="margin-top: 0; margin-bottom: 12px;">Odoo Inventory Verification</h2>
+      <p style="color: var(--muted); font-size: 14px; margin-bottom: 12px;">
+        Open Odoo → AgriRegistry360 → Inventory Reservations to verify <code>RESERVE-0001</code>, and open Inventory Items to verify <code>FERTILIZER_50KG</code>.
+      </p>
+      <div class="grid verification-grid">
+        <div class="detail-item">
+          <div class="detail-label">Open Odoo UI</div>
+          <div class="detail-value"><a href="http://localhost:8069" target="_blank">http://localhost:8069</a></div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Odoo Menu Path</div>
+          <div class="detail-value">AgriRegistry360 → Inventory Reservations / Inventory Items</div>
+        </div>
+      </div>
+    </section>
+
     <!-- Live Instructions and Platform Demo Checklist Section -->
     <section class="grid platform-two-column">
       <!-- Live Platform Sync Instructions -->

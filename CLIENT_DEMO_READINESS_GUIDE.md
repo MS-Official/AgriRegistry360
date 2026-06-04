@@ -242,7 +242,7 @@ These records prove that AgriRegistry360 data has been pushed into the OpenG2P-c
 
 ## Installing the AgriRegistry360 Odoo Addon
 
-Install the demo addon so the client sees AgriRegistry360 as a proper Odoo application with menus for Farmers, Farms / Lands, Crops, Eligibility Checks, Program Enrollments, and Inventory Reservations.
+Install the demo addon so the client sees AgriRegistry360 as a proper Odoo application with menus for Farmers, Farms / Lands, Crops, Eligibility Checks, Program Enrollments, Inventory Items, and Inventory Reservations.
 
 Install in Odoo ERP:
 1. Open `http://localhost:8069`.
@@ -259,3 +259,13 @@ Install in OpenG2P-compatible Odoo:
 5. Activate **AgriRegistry360 Farm Registry**.
 
 After installation, rerun the full sync from Platform Sync Center. Records should appear under the **AgriRegistry360** top-level Odoo menu. If the addon is not installed, fallback Contacts sync remains available.
+
+Odoo inventory verification:
+1. Open the AgriRegistry360 frontend reservation list.
+2. Confirm `RESERVE-0001` exists.
+3. Click **Platform Sync → Sync Full Demo Flow**.
+4. Open Odoo ERP at `http://localhost:8069`.
+5. Go to **AgriRegistry360 → Inventory Reservations**.
+6. Confirm `RESERVE-0001` appears.
+7. Go to **AgriRegistry360 → Inventory Items**.
+8. Confirm `FERTILIZER_50KG` appears.

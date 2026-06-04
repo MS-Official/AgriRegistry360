@@ -10,9 +10,11 @@ import { Farm } from '../src/models/farm.model.js';
 import { Crop } from '../src/models/crop.model.js';
 import { Eligibility } from '../src/models/eligibility.model.js';
 import { Enrollment } from '../src/models/enrollment.model.js';
+import { InventoryItem } from '../src/models/inventoryItem.model.js';
 import { InventoryReservation } from '../src/models/inventoryReservation.model.js';
 import { PlatformSync } from '../src/models/platformSync.model.js';
 import { config } from '../src/config/env.js';
+import { odooClient } from '../src/integrations/odoo/odooClient.js';
 import { openG2PClient } from '../src/integrations/openg2p/openG2PClient.js';
 
 let mongoServer;
@@ -115,6 +117,18 @@ const reservationPayload = {
   reservedBy: 'Field Officer',
 };
 
+const inventoryItemPayload = {
+  itemCode: 'FERTILIZER_50KG',
+  itemName: 'NPK Fertilizer 50KG Bag',
+  category: 'FERTILIZER',
+  availableQuantity: 100,
+  reservedQuantity: 1,
+  distributedQuantity: 0,
+  unit: 'BAGS',
+  warehouseName: 'Anuradhapura Storage',
+  status: 'ACTIVE',
+};
+
 describe('Platform Sync API', () => {
   before(async () => {
     mongoServer = await MongoMemoryServer.create();
@@ -160,6 +174,8 @@ describe('Platform Sync API', () => {
       eligibility: eligibilityDoc._id,
     });
 
+    await InventoryItem.create(inventoryItemPayload);
+
     const reservationDoc = await InventoryReservation.create({
       ...reservationPayload,
       farmer: farmerDoc._id,
@@ -189,11 +205,17 @@ describe('Platform Sync API', () => {
     const farmerSyncStep = syncResponse.body.data.steps.find((s) => s.step === 'Farmer → Odoo Contact/Partner');
     assert.ok(farmerSyncStep);
     assert.equal(farmerSyncStep.syncStatus, 'DEMO_MODE');
+    const inventoryItemStep = syncResponse.body.data.steps.find((s) => s.step === 'Inventory Item → Odoo Inventory Item');
+    assert.ok(inventoryItemStep);
+    assert.equal(inventoryItemStep.entityCode, 'FERTILIZER_50KG');
+    const reservationStep = syncResponse.body.data.steps.find((s) => s.step === 'Reservation → Odoo Inventory Fulfilment');
+    assert.ok(reservationStep);
+    assert.equal(reservationStep.targetModel, 'agriregistry.inventory.reservation');
 
     // Retrieve status again
     const statusResponse = await request(app).get('/api/platform-sync/status').expect(200);
-    assert.equal(statusResponse.body.data.odoo.total, 2); // Farmer + Reservation
-    assert.equal(statusResponse.body.data.odoo.demo, 2);
+    assert.equal(statusResponse.body.data.odoo.total, 3); // Farmer + Inventory Item + Reservation
+    assert.equal(statusResponse.body.data.odoo.demo, 3);
 
     // Retrieve logs
     const logsResponse = await request(app).get('/api/platform-sync/logs').expect(200);
@@ -211,6 +233,140 @@ describe('Platform Sync API', () => {
     assert.equal(response.body.success, true);
     assert.equal(response.body.data.syncStatus, 'DEMO_MODE');
     assert.equal(response.body.data.entityCode, 'FARMER-0001');
+  });
+
+  it('syncs reservation to Odoo custom reservation model when available', async () => {
+    const { reservationDoc } = await seedDatabase();
+    const originalEnabled = config.odooEnabled;
+    const originalCheckModelExists = odooClient.checkModelExists;
+    const originalUpsertByField = odooClient.upsertByField;
+    const calls = [];
+
+    config.odooEnabled = true;
+    odooClient.checkModelExists = async (model) => model === 'agriregistry.inventory.reservation';
+    odooClient.upsertByField = async (model, lookupField, lookupValue, values) => {
+      calls.push({ model, lookupField, lookupValue, values });
+      return { action: 'created', id: 901, model };
+    };
+
+    try {
+      const response = await request(app)
+        .post(`/api/platform-sync/reservations/${reservationDoc._id}/odoo`)
+        .expect(200);
+
+      assert.equal(response.body.success, true);
+      assert.equal(response.body.data.syncStatus, 'SYNCED');
+      assert.equal(response.body.data.targetModel, 'agriregistry.inventory.reservation');
+      assert.equal(response.body.data.requestPayload.reservation_code, 'RESERVE-0001');
+      assert.equal(response.body.data.requestPayload.farmer_name, 'Mohamed Ameen');
+      assert.equal(response.body.data.requestPayload.farm_code, 'FARM-LAND-0001');
+      assert.equal(response.body.data.requestPayload.crop_code, 'CROP-0001');
+      assert.equal(response.body.data.requestPayload.quantity_unit, 'BAGS');
+      assert.equal(calls[0].lookupField, 'reservation_code');
+      assert.equal(calls[0].lookupValue, 'RESERVE-0001');
+    } finally {
+      config.odooEnabled = originalEnabled;
+      odooClient.checkModelExists = originalCheckModelExists;
+      odooClient.upsertByField = originalUpsertByField;
+    }
+  });
+
+  it('falls back reservation sync only when Odoo custom reservation model is unavailable', async () => {
+    const { reservationDoc } = await seedDatabase();
+    const originalEnabled = config.odooEnabled;
+    const originalCheckModelExists = odooClient.checkModelExists;
+    const originalUpsertByField = odooClient.upsertByField;
+
+    config.odooEnabled = true;
+    odooClient.checkModelExists = async () => false;
+    odooClient.upsertByField = async (model, lookupField, lookupValue, values) => ({
+      action: 'updated',
+      id: 902,
+      model,
+      lookupField,
+      lookupValue,
+      values,
+    });
+
+    try {
+      const response = await request(app)
+        .post(`/api/platform-sync/reservations/${reservationDoc._id}/odoo`)
+        .expect(200);
+
+      assert.equal(response.body.success, true);
+      assert.equal(response.body.data.syncStatus, 'FALLBACK_SYNCED');
+      assert.equal(response.body.data.targetModel, 'res.partner');
+      assert.equal(response.body.data.requestPayload.ref, 'RESERVE-0001');
+      assert.match(response.body.data.errorMessage, /custom model agriregistry.inventory.reservation was not detected/);
+    } finally {
+      config.odooEnabled = originalEnabled;
+      odooClient.checkModelExists = originalCheckModelExists;
+      odooClient.upsertByField = originalUpsertByField;
+    }
+  });
+
+  it('uses reservation upsert logs and does not duplicate sync log records', async () => {
+    const { reservationDoc } = await seedDatabase();
+    const originalEnabled = config.odooEnabled;
+    const originalCheckModelExists = odooClient.checkModelExists;
+    const originalUpsertByField = odooClient.upsertByField;
+    let callCount = 0;
+
+    config.odooEnabled = true;
+    odooClient.checkModelExists = async (model) => model === 'agriregistry.inventory.reservation';
+    odooClient.upsertByField = async (model) => {
+      callCount += 1;
+      return { action: callCount === 1 ? 'created' : 'updated', id: 903, model };
+    };
+
+    try {
+      await request(app).post(`/api/platform-sync/reservations/${reservationDoc._id}/odoo`).expect(200);
+      await request(app).post(`/api/platform-sync/reservations/${reservationDoc._id}/odoo`).expect(200);
+
+      assert.equal(callCount, 2);
+      assert.equal(await PlatformSync.countDocuments({ entityType: 'INVENTORY_RESERVATION', platform: 'ODOO' }), 1);
+      const log = await PlatformSync.findOne({ entityType: 'INVENTORY_RESERVATION', platform: 'ODOO' });
+      assert.equal(log.responsePayload.action, 'updated');
+    } finally {
+      config.odooEnabled = originalEnabled;
+      odooClient.checkModelExists = originalCheckModelExists;
+      odooClient.upsertByField = originalUpsertByField;
+    }
+  });
+
+  it('syncs inventory items to Odoo custom inventory item model', async () => {
+    await seedDatabase();
+    const originalEnabled = config.odooEnabled;
+    const originalCheckModelExists = odooClient.checkModelExists;
+    const originalUpsertByField = odooClient.upsertByField;
+
+    config.odooEnabled = true;
+    odooClient.checkModelExists = async (model) => model === 'agriregistry.inventory.item';
+    odooClient.upsertByField = async (model, lookupField, lookupValue, values) => ({
+      action: 'created',
+      id: 904,
+      model,
+      lookupField,
+      lookupValue,
+      values,
+    });
+
+    try {
+      const response = await request(app)
+        .post('/api/platform-sync/inventory-items/odoo')
+        .expect(200);
+
+      assert.equal(response.body.success, true);
+      assert.equal(response.body.data.total, 1);
+      assert.equal(response.body.data.synced, 1);
+      assert.equal(response.body.data.logs[0].targetModel, 'agriregistry.inventory.item');
+      assert.equal(response.body.data.logs[0].requestPayload.item_code, 'FERTILIZER_50KG');
+      assert.equal(response.body.data.logs[0].requestPayload.quantity_unit, 'BAGS');
+    } finally {
+      config.odooEnabled = originalEnabled;
+      odooClient.checkModelExists = originalCheckModelExists;
+      odooClient.upsertByField = originalUpsertByField;
+    }
   });
 
   it('returns OpenG2P configured model discovery when integration is disabled', async () => {

@@ -235,9 +235,15 @@
                 <field name="reservation_code"/>
                 <field name="enrollment_code"/>
                 <field name="farmer_code"/>
+                <field name="farmer_name"/>
+                <field name="farm_code"/>
+                <field name="crop_code"/>
+                <field name="program_name"/>
                 <field name="item_code"/>
                 <field name="item_name"/>
                 <field name="reserved_quantity"/>
+                <field name="quantity_unit"/>
+                <field name="warehouse_name"/>
                 <field name="reservation_status"/>
             </tree>
         </field>
@@ -250,14 +256,25 @@
             <form string="Inventory Reservation">
                 <sheet>
                     <group>
+                        <field name="name"/>
                         <field name="reservation_code"/>
                         <field name="enrollment_code"/>
                         <field name="farmer_code"/>
+                        <field name="farmer_name"/>
+                        <field name="farm_code"/>
+                        <field name="crop_code"/>
+                        <field name="program_name"/>
+                        <field name="entitlement"/>
                         <field name="item_code"/>
                         <field name="item_name"/>
                         <field name="reserved_quantity"/>
+                        <field name="quantity_unit"/>
+                        <field name="warehouse_name"/>
                         <field name="reservation_status"/>
                         <field name="reserved_by"/>
+                        <field name="reserved_at"/>
+                        <field name="issued_at"/>
+                        <field name="notes"/>
                         <field name="external_mongo_id"/>
                     </group>
                 </sheet>
@@ -271,11 +288,60 @@
         <field name="view_mode">tree,form</field>
     </record>
 
+    <record id="view_agriregistry_inventory_item_tree" model="ir.ui.view">
+        <field name="name">agriregistry.inventory.item.tree</field>
+        <field name="model">agriregistry.inventory.item</field>
+        <field name="arch" type="xml">
+            <tree string="Inventory Items">
+                <field name="item_code"/>
+                <field name="item_name"/>
+                <field name="category"/>
+                <field name="available_quantity"/>
+                <field name="reserved_quantity"/>
+                <field name="distributed_quantity"/>
+                <field name="quantity_unit"/>
+                <field name="warehouse_name"/>
+                <field name="status"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_agriregistry_inventory_item_form" model="ir.ui.view">
+        <field name="name">agriregistry.inventory.item.form</field>
+        <field name="model">agriregistry.inventory.item</field>
+        <field name="arch" type="xml">
+            <form string="Inventory Item">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="item_code"/>
+                        <field name="item_name"/>
+                        <field name="category"/>
+                        <field name="available_quantity"/>
+                        <field name="reserved_quantity"/>
+                        <field name="distributed_quantity"/>
+                        <field name="quantity_unit"/>
+                        <field name="warehouse_name"/>
+                        <field name="status"/>
+                        <field name="external_mongo_id"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_agriregistry_inventory_item" model="ir.actions.act_window">
+        <field name="name">Inventory Items</field>
+        <field name="res_model">agriregistry.inventory.item</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
     <menuitem id="menu_agriregistry360_root" name="AgriRegistry360" sequence="20"/>
     <menuitem id="menu_agriregistry360_farmers" name="Farmers" parent="menu_agriregistry360_root" action="action_agriregistry_farmer" sequence="10"/>
     <menuitem id="menu_agriregistry360_farms" name="Farms / Lands" parent="menu_agriregistry360_root" action="action_agriregistry_farm" sequence="20"/>
     <menuitem id="menu_agriregistry360_crops" name="Crops" parent="menu_agriregistry360_root" action="action_agriregistry_crop" sequence="30"/>
     <menuitem id="menu_agriregistry360_eligibility" name="Eligibility Checks" parent="menu_agriregistry360_root" action="action_agriregistry_eligibility" sequence="40"/>
     <menuitem id="menu_agriregistry360_enrollments" name="Program Enrollments" parent="menu_agriregistry360_root" action="action_agriregistry_enrollment" sequence="50"/>
-    <menuitem id="menu_agriregistry360_reservations" name="Inventory Reservations" parent="menu_agriregistry360_root" action="action_agriregistry_inventory_reservation" sequence="60"/>
+    <menuitem id="menu_agriregistry360_inventory_items" name="Inventory Items" parent="menu_agriregistry360_root" action="action_agriregistry_inventory_item" sequence="60"/>
+    <menuitem id="menu_agriregistry360_reservations" name="Inventory Reservations" parent="menu_agriregistry360_root" action="action_agriregistry_inventory_reservation" sequence="70"/>
 </odoo>

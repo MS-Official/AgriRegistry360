@@ -98,16 +98,29 @@ docker compose up -d --force-recreate backend
   | `farmerType` + `verificationStatus` | `comment` | Internal metadata note |
 
 ### Inventory Reservation Sync
-* **Target Model:** `product.template` (with linked `product.product` matching inventory items)
+* **Target Model:** `agriregistry.inventory.reservation`
 * **Data Mapping:**
   | AgriRegistry360 Field | Odoo Field | Note / Format |
   | --- | --- | --- |
-  | `reservationCode` | `reference` | Unique identifier (e.g., `RESERVE-0001`) |
-  | `enrollmentCode` | `origin` | Source program enrollment reference |
-  | `farmerName` | `partner` | Customer Contact name |
-  | `itemCode` | `product_sku` | Product SKU (e.g., `FERTILIZER_50KG`) |
-  | `reservedQuantity` | `quantity` | Allocation amount |
-  | `reservationStatus` | `state` | Allocation state |
+  | `reservationCode` | `reservation_code` | Unique lookup for upsert, e.g. `RESERVE-0001` |
+  | `enrollmentCode` | `enrollment_code` | Source program enrollment reference |
+  | `farmerCode` / `farmerName` | `farmer_code` / `farmer_name` | Beneficiary identity |
+  | `farmCode` / `cropCode` | `farm_code` / `crop_code` | Registry context |
+  | `programName` / `entitlement` | `program_name` / `entitlement` | Subsidy context |
+  | `itemCode` / `itemName` | `item_code` / `item_name` | Inventory item |
+  | `reservedQuantity` / `unit` | `reserved_quantity` / `quantity_unit` | Allocation amount |
+  | `warehouseName` | `warehouse_name` | Fulfilment location |
+  | `reservationStatus` | `reservation_status` | `RESERVED`, `ISSUED`, or `CANCELLED` |
+  | `reservedBy`, `notes`, `reservedAt` | `reserved_by`, `notes`, `reserved_at` | Operational metadata |
+
+Reservation sync uses `reservation_code` as the Odoo upsert key, so repeated syncs update `RESERVE-0001` instead of creating duplicate records. If the custom model is unavailable, the backend keeps the visible fallback behavior and writes a `res.partner` record with `FALLBACK_SYNCED`.
+
+### Inventory Item Sync
+* **Target Model:** `agriregistry.inventory.item`
+* **Upsert Key:** `item_code`
+* **Demo Item:** `FERTILIZER_50KG`
+
+Inventory item sync pushes MongoDB stock records into Odoo fields including `item_code`, `item_name`, `category`, `available_quantity`, `reserved_quantity`, `distributed_quantity`, `quantity_unit`, `warehouse_name`, and `status`.
 
 ---
 
@@ -156,6 +169,7 @@ OPENG2P_CROP_MODEL=agriregistry.crop
 OPENG2P_ELIGIBILITY_MODEL=agriregistry.eligibility
 OPENG2P_FALLBACK_MODEL=res.partner
 ODOO_FARMER_MODEL=agriregistry.farmer
+ODOO_INVENTORY_ITEM_MODEL=agriregistry.inventory.item
 ODOO_RESERVATION_MODEL=agriregistry.inventory.reservation
 ```
 
@@ -170,6 +184,15 @@ OpenG2P UI verification:
 2. Go to **Contacts**.
 3. Search for `Mohamed Ameen`, `FARM-LAND-0001`, `CROP-0001`, `ELIG`, or `ENROLL`.
 4. Open the matching records and review the `ref`, `name`, and internal notes/comments.
+
+Odoo inventory verification:
+1. Open the AgriRegistry360 frontend reservation list and confirm `RESERVE-0001` exists.
+2. Click **Platform Sync → Sync Full Demo Flow**.
+3. Open Odoo ERP at `http://localhost:8069`.
+4. Go to **AgriRegistry360 → Inventory Reservations**.
+5. Confirm `RESERVE-0001` appears with target model `agriregistry.inventory.reservation`.
+6. Go to **AgriRegistry360 → Inventory Items**.
+7. Confirm `FERTILIZER_50KG` appears with target model `agriregistry.inventory.item`.
 
 ### Installing the AgriRegistry360 Odoo Addon
 

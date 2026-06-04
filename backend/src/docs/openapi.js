@@ -301,6 +301,15 @@ export const openApiSpec = withPathParameters({
         responses: { 200: okResponse, 500: errorResponse },
       },
     },
+    '/api/platform-sync/inventory-items/odoo': {
+      post: {
+        tags: ['Platform Sync'],
+        summary: 'Sync inventory items to Odoo',
+        description:
+          'Syncs MongoDB inventory items into agriregistry.inventory.item when the Odoo custom model exists, or visible fallback records otherwise.',
+        responses: { 200: okResponse, 500: errorResponse },
+      },
+    },
     '/api/platform-sync/reservations/{reservationId}/odoo': {
       post: {
         tags: ['Platform Sync'],

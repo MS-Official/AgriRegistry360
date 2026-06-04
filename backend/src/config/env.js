@@ -18,6 +18,7 @@ export const config = {
   odooUsername: process.env.ODOO_USERNAME || 'admin',
   odooPassword: process.env.ODOO_PASSWORD || 'admin',
   odooFarmerModel: process.env.ODOO_FARMER_MODEL || 'agriregistry.farmer',
+  odooInventoryItemModel: process.env.ODOO_INVENTORY_ITEM_MODEL || 'agriregistry.inventory.item',
   odooReservationModel: process.env.ODOO_RESERVATION_MODEL || 'agriregistry.inventory.reservation',
 
   // OpenG2P Config

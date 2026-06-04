@@ -82,6 +82,25 @@ export async function syncReservationToOdoo(req, res, next) {
   }
 }
 
+export async function syncInventoryItemsToOdoo(req, res, next) {
+  try {
+    const logs = await platformSyncService.syncInventoryItemsToOdoo();
+    res.json({
+      success: true,
+      message: 'Inventory item Odoo sync completed',
+      data: {
+        total: logs.length,
+        synced: logs.filter((log) => log.syncStatus === 'SYNCED' || log.syncStatus === 'FALLBACK_SYNCED').length,
+        demo: logs.filter((log) => log.syncStatus === 'DEMO_MODE').length,
+        failed: logs.filter((log) => log.syncStatus === 'FAILED').length,
+        logs,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
 export async function syncFullDemo(req, res, next) {
   try {
     const result = await platformSyncService.syncFullDemoFlow();

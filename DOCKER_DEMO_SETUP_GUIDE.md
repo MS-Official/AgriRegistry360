@@ -61,6 +61,8 @@ ODOO_URL=http://odoo:8069
 ODOO_DB=agriregistry360
 ODOO_USERNAME=admin@example.com
 ODOO_PASSWORD=admin
+ODOO_INVENTORY_ITEM_MODEL=agriregistry.inventory.item
+ODOO_RESERVATION_MODEL=agriregistry.inventory.reservation
 
 OPENG2P_URL=http://openg2p:8069
 OPENG2P_DB=openg2p
@@ -171,6 +173,25 @@ To verify fallback records in the UI:
 1. Open `http://localhost:8070`.
 2. Go to **Contacts**.
 3. Search for `Mohamed Ameen`, `FARM-LAND-0001`, `CROP-0001`, `ELIG`, or `ENROLL`.
+
+### Odoo Inventory Sync Verification
+
+After installing the **AgriRegistry360 Farm Registry** addon in Odoo ERP and recreating the backend container, verify inventory sync:
+1. Open the AgriRegistry360 frontend reservation list and confirm `RESERVE-0001` exists.
+2. Click **Platform Sync → Sync Full Demo Flow**.
+3. Open Odoo ERP at `http://localhost:8069`.
+4. Go to **AgriRegistry360 → Inventory Reservations**.
+5. Confirm `RESERVE-0001` appears.
+6. Go to **AgriRegistry360 → Inventory Items**.
+7. Confirm `FERTILIZER_50KG` appears.
+
+Useful sync commands:
+```bash
+curl http://localhost:5001/api/platform-sync/odoo/connection-check
+curl -X POST http://localhost:5001/api/platform-sync/inventory-items/odoo
+curl -X POST http://localhost:5001/api/platform-sync/full-demo
+curl http://localhost:5001/api/platform-sync/logs
+```
 
 ---
 

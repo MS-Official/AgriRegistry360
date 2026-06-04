@@ -14,6 +14,7 @@ platformSyncRouter.post('/farms/:farmId/openg2p', platformSyncController.syncFar
 platformSyncRouter.post('/crops/:cropId/openg2p', platformSyncController.syncCropToOpenG2P);
 platformSyncRouter.post('/eligibility/:eligibilityId/openg2p', platformSyncController.syncEligibilityToOpenG2P);
 platformSyncRouter.post('/enrollments/:enrollmentId/openg2p', platformSyncController.syncEnrollmentToOpenG2P);
+platformSyncRouter.post('/inventory-items/odoo', platformSyncController.syncInventoryItemsToOdoo);
 platformSyncRouter.post('/reservations/:reservationId/odoo', platformSyncController.syncReservationToOdoo);
 
 // Full Flow Sync API

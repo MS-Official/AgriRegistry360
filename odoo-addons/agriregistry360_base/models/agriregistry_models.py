@@ -92,12 +92,41 @@ class AgriRegistryInventoryReservation(models.Model):
     _description = "AgriRegistry360 Inventory Reservation"
     _rec_name = "reservation_code"
 
+    name = fields.Char()
     reservation_code = fields.Char(required=True, index=True)
     enrollment_code = fields.Char(index=True)
     farmer_code = fields.Char(index=True)
+    farmer_name = fields.Char()
+    farm_code = fields.Char(index=True)
+    crop_code = fields.Char(index=True)
+    program_name = fields.Char()
+    entitlement = fields.Char()
     item_code = fields.Char(index=True)
     item_name = fields.Char()
     reserved_quantity = fields.Float()
+    quantity_unit = fields.Char()
+    warehouse_name = fields.Char()
     reservation_status = fields.Char()
     reserved_by = fields.Char()
+    notes = fields.Text()
+    reserved_at = fields.Datetime()
+    issued_at = fields.Datetime()
+    external_mongo_id = fields.Char(index=True)
+
+
+class AgriRegistryInventoryItem(models.Model):
+    _name = "agriregistry.inventory.item"
+    _description = "AgriRegistry360 Inventory Item"
+    _rec_name = "item_code"
+
+    name = fields.Char()
+    item_code = fields.Char(required=True, index=True)
+    item_name = fields.Char(required=True)
+    category = fields.Char()
+    available_quantity = fields.Float()
+    reserved_quantity = fields.Float()
+    distributed_quantity = fields.Float()
+    quantity_unit = fields.Char()
+    warehouse_name = fields.Char()
+    status = fields.Char()
     external_mongo_id = fields.Char(index=True)

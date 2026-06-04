@@ -9,6 +9,7 @@ import { Eligibility } from '../models/eligibility.model.js';
 import { Enrollment } from '../models/enrollment.model.js';
 import { Farm } from '../models/farm.model.js';
 import { Farmer } from '../models/farmer.model.js';
+import { InventoryItem } from '../models/inventoryItem.model.js';
 import { InventoryReservation } from '../models/inventoryReservation.model.js';
 import { PlatformSync } from '../models/platformSync.model.js';
 
@@ -50,6 +51,11 @@ const OPENG2P_FALLBACK_MESSAGE =
 
 function formatRuleResults(ruleResults = []) {
   return ruleResults.map((rule) => `${rule.rule}: ${rule.passed ? 'PASSED' : 'FAILED'}`).join('; ');
+}
+
+function formatOdooDatetime(value) {
+  if (!value) return false;
+  return new Date(value).toISOString().slice(0, 19).replace('T', ' ');
 }
 
 async function syncOpenG2PRecord({
@@ -580,24 +586,44 @@ export async function syncReservationToOdoo(reservationId) {
     throw new Error('Inventory Reservation not found');
   }
 
-  const payload = {
-    origin: reservation.enrollmentCode,
-    reference: reservation.reservationCode,
-    partner: reservation.farmerName,
-    partner_ref: reservation.farmerCode,
-    product_sku: reservation.itemCode,
-    quantity: reservation.reservedQuantity,
-    state: reservation.reservationStatus,
+  const fallbackPayload = {
+    name: `Reservation: ${reservation.reservationCode} - ${reservation.itemName}`,
+    ref: reservation.reservationCode,
+    comment: [
+      `AgriRegistry Inventory Reservation`,
+      `Reservation: ${reservation.reservationCode}`,
+      `Enrollment: ${reservation.enrollmentCode}`,
+      `Farmer: ${reservation.farmerName} (${reservation.farmerCode})`,
+      `Farm: ${reservation.farmCode}`,
+      `Crop: ${reservation.cropCode}`,
+      `Program: ${reservation.programName}`,
+      `Entitlement: ${reservation.entitlement}`,
+      `Item: ${reservation.itemName} (${reservation.itemCode})`,
+      `Quantity: ${reservation.reservedQuantity} ${reservation.unit}`,
+      `Warehouse: ${reservation.warehouseName}`,
+      `Status: ${reservation.reservationStatus}`,
+    ].join('\n'),
   };
   const registryPayload = {
+    name: reservation.reservationCode,
     reservation_code: reservation.reservationCode,
     enrollment_code: reservation.enrollmentCode,
     farmer_code: reservation.farmerCode,
+    farmer_name: reservation.farmerName,
+    farm_code: reservation.farmCode,
+    crop_code: reservation.cropCode,
+    program_name: reservation.programName,
+    entitlement: reservation.entitlement,
     item_code: reservation.itemCode,
     item_name: reservation.itemName,
     reserved_quantity: reservation.reservedQuantity,
+    quantity_unit: reservation.unit,
+    warehouse_name: reservation.warehouseName,
     reservation_status: reservation.reservationStatus,
     reserved_by: reservation.reservedBy,
+    notes: reservation.notes || '',
+    reserved_at: formatOdooDatetime(reservation.reservedAt),
+    issued_at: reservation.reservationStatus === 'ISSUED' ? formatOdooDatetime(reservation.updatedAt) : false,
     external_mongo_id: reservation._id.toString(),
   };
 
@@ -613,28 +639,36 @@ export async function syncReservationToOdoo(reservationId) {
     let requestPayload = registryPayload;
 
     if (config.odooEnabled) {
-      try {
-        const registryModelExists = await odooClient.checkModelExists(model);
-        if (registryModelExists) {
+      const registryModelExists = await odooClient.checkModelExists(model);
+      if (registryModelExists) {
+        try {
           const upsert = await odooClient.upsertByField(model, 'reservation_code', reservation.reservationCode, registryPayload);
           externalId = `ODOO-RESERVE-${upsert.id}`;
           response = { success: true, action: upsert.action, odooId: upsert.id, model };
-        } else {
+        } catch (targetError) {
           targetModel = 'res.partner';
-          requestPayload = {
-            name: `Reservation: ${reservation.reservationCode} - ${reservation.itemName}`,
-            ref: reservation.reservationCode,
-            comment: `Reserved ${reservation.reservedQuantity} of ${reservation.itemName} for ${reservation.farmerName}. Enrollment: ${reservation.enrollmentCode}`,
+          requestPayload = fallbackPayload;
+          const upsert = await odooClient.upsertByField(targetModel, 'ref', reservation.reservationCode, fallbackPayload);
+          externalId = `ODOO-RESERVE-FALLBACK-${upsert.id}`;
+          response = {
+            success: true,
+            mode: 'visible_fallback',
+            action: upsert.action,
+            odooId: upsert.id,
+            model: targetModel,
+            targetModelWriteError: targetError.message,
           };
-          const upsert = await odooClient.upsertByField(targetModel, 'ref', reservation.reservationCode, requestPayload);
-          externalId = `ODOO-RESERVE-${upsert.id}`;
-          response = { success: true, action: upsert.action, odooId: upsert.id, model: targetModel };
+          warning = `Odoo reservation custom model ${model} exists but could not accept the mapped payload, so a visible fallback res.partner record was upserted: ${targetError.message}`;
+          syncStatus = 'FALLBACK_SYNCED';
         }
-      } catch (innerError) {
-        externalId = `DEMO-ODOO-RESERVE-${reservation.reservationCode}`;
-        response = { success: true, mode: 'demo_fallback', simulatedId: externalId };
-        warning = 'Connected to Odoo, but target inventory model was unavailable. Demo sync log created.';
-        syncStatus = 'DEMO_MODE';
+      } else {
+        targetModel = 'res.partner';
+        requestPayload = fallbackPayload;
+        const upsert = await odooClient.upsertByField(targetModel, 'ref', reservation.reservationCode, fallbackPayload);
+        externalId = `ODOO-RESERVE-FALLBACK-${upsert.id}`;
+        response = { success: true, mode: 'visible_fallback', action: upsert.action, odooId: upsert.id, model: targetModel };
+        warning = `Odoo reservation custom model ${model} was not detected, so a visible fallback res.partner record was upserted.`;
+        syncStatus = 'FALLBACK_SYNCED';
       }
     } else {
       externalId = `DEMO-ODOO-RESERVE-${reservation.reservationCode}`;
@@ -669,6 +703,118 @@ export async function syncReservationToOdoo(reservationId) {
     });
     return log;
   }
+}
+
+/**
+ * Sync Inventory Items to Odoo custom module.
+ */
+export async function syncInventoryItemsToOdoo() {
+  const items = await InventoryItem.find().sort({ itemCode: 1 });
+  const results = [];
+
+  for (const item of items) {
+    const model = config.odooInventoryItemModel;
+    const registryPayload = {
+      name: item.itemCode,
+      item_code: item.itemCode,
+      item_name: item.itemName,
+      category: item.category,
+      available_quantity: item.availableQuantity,
+      reserved_quantity: item.reservedQuantity,
+      distributed_quantity: item.distributedQuantity,
+      quantity_unit: item.unit,
+      warehouse_name: item.warehouseName,
+      status: item.status,
+      external_mongo_id: item._id.toString(),
+    };
+    const fallbackPayload = {
+      name: `Inventory Item: ${item.itemCode} - ${item.itemName}`,
+      ref: item.itemCode,
+      comment: [
+        'AgriRegistry Inventory Item',
+        `Item: ${item.itemName} (${item.itemCode})`,
+        `Category: ${item.category}`,
+        `Available: ${item.availableQuantity} ${item.unit}`,
+        `Reserved: ${item.reservedQuantity} ${item.unit}`,
+        `Distributed: ${item.distributedQuantity} ${item.unit}`,
+        `Warehouse: ${item.warehouseName}`,
+        `Status: ${item.status}`,
+      ].join('\n'),
+    };
+
+    let targetModel = model;
+    let requestPayload = registryPayload;
+    let response = null;
+    let externalId = '';
+    let syncStatus = config.odooEnabled ? 'SYNCED' : 'DEMO_MODE';
+    let warning = '';
+
+    try {
+      if (config.odooEnabled) {
+        const modelExists = await odooClient.checkModelExists(model);
+        if (modelExists) {
+          try {
+            const upsert = await odooClient.upsertByField(model, 'item_code', item.itemCode, registryPayload);
+            externalId = `ODOO-ITEM-${upsert.id}`;
+            response = { success: true, action: upsert.action, odooId: upsert.id, model };
+          } catch (targetError) {
+            targetModel = 'res.partner';
+            requestPayload = fallbackPayload;
+            const upsert = await odooClient.upsertByField(targetModel, 'ref', item.itemCode, fallbackPayload);
+            externalId = `ODOO-ITEM-FALLBACK-${upsert.id}`;
+            response = {
+              success: true,
+              mode: 'visible_fallback',
+              action: upsert.action,
+              odooId: upsert.id,
+              model: targetModel,
+              targetModelWriteError: targetError.message,
+            };
+            warning = `Odoo inventory item custom model ${model} exists but could not accept the mapped payload, so a visible fallback res.partner record was upserted: ${targetError.message}`;
+            syncStatus = 'FALLBACK_SYNCED';
+          }
+        } else {
+          targetModel = 'res.partner';
+          requestPayload = fallbackPayload;
+          const upsert = await odooClient.upsertByField(targetModel, 'ref', item.itemCode, fallbackPayload);
+          externalId = `ODOO-ITEM-FALLBACK-${upsert.id}`;
+          response = { success: true, mode: 'visible_fallback', action: upsert.action, odooId: upsert.id, model: targetModel };
+          warning = `Odoo inventory item custom model ${model} was not detected, so a visible fallback res.partner record was upserted.`;
+          syncStatus = 'FALLBACK_SYNCED';
+        }
+      } else {
+        externalId = `DEMO-ODOO-ITEM-${item.itemCode}`;
+        response = { success: true, mode: 'demo', simulatedId: externalId };
+      }
+
+      results.push(await createOrUpdateSyncLog({
+        entityType: 'INVENTORY_ITEM',
+        entityId: item._id.toString(),
+        entityCode: item.itemCode,
+        platform: 'ODOO',
+        targetModel,
+        syncStatus,
+        requestPayload,
+        responsePayload: response,
+        targetExternalId: externalId,
+        errorMessage: warning,
+      }));
+    } catch (error) {
+      results.push(await createOrUpdateSyncLog({
+        entityType: 'INVENTORY_ITEM',
+        entityId: item._id.toString(),
+        entityCode: item.itemCode,
+        platform: 'ODOO',
+        targetModel: model,
+        syncStatus: 'FAILED',
+        requestPayload: registryPayload,
+        responsePayload: null,
+        errorMessage: error.message,
+      }));
+    }
+  }
+
+  return results;
 }
 
 /**
@@ -841,12 +987,39 @@ export async function syncFullDemoFlow() {
     // 6. Find linked inventory reservation
     const reservation = await InventoryReservation.findOne({ enrollment: enrollment._id });
     if (reservation) {
+      const inventoryItem = await InventoryItem.findOne({ itemCode: reservation.itemCode });
+      if (inventoryItem) {
+        const itemLogs = await syncInventoryItemsToOdoo();
+        const itemLog = itemLogs.find((log) => log.entityCode === inventoryItem.itemCode);
+        steps.push({
+          step: 'Inventory Item → Odoo Inventory Item',
+          entityCode: inventoryItem.itemCode,
+          platform: 'ODOO',
+          targetModel: itemLog?.targetModel || config.odooInventoryItemModel,
+          syncMode: config.odooEnabled ? 'LIVE' : 'DEMO_MODE',
+          syncStatus: itemLog?.syncStatus || 'DISABLED',
+          errorMessage: itemLog?.errorMessage || '',
+          requestPayload: itemLog?.requestPayload,
+          responsePayload: itemLog?.responsePayload,
+        });
+      } else {
+        steps.push({
+          step: 'Inventory Item → Odoo Inventory Item',
+          entityCode: reservation.itemCode || 'N/A',
+          platform: 'ODOO',
+          targetModel: config.odooInventoryItemModel,
+          syncMode: config.odooEnabled ? 'LIVE' : 'DEMO_MODE',
+          syncStatus: 'DISABLED',
+          errorMessage: 'No inventory item found for the reservation item code.',
+        });
+      }
+
       const reservationLog = await syncReservationToOdoo(reservation._id);
       steps.push({
         step: 'Reservation → Odoo Inventory Fulfilment',
         entityCode: reservation.reservationCode,
         platform: 'ODOO',
-        targetModel: reservationLog.targetModel || 'product.template',
+        targetModel: reservationLog.targetModel || config.odooReservationModel,
         syncMode: config.odooEnabled ? 'LIVE' : 'DEMO_MODE',
         syncStatus: reservationLog.syncStatus,
         errorMessage: reservationLog.errorMessage,
@@ -855,10 +1028,19 @@ export async function syncFullDemoFlow() {
       });
     } else {
       steps.push({
+        step: 'Inventory Item → Odoo Inventory Item',
+        entityCode: 'N/A',
+        platform: 'ODOO',
+        targetModel: config.odooInventoryItemModel,
+        syncMode: config.odooEnabled ? 'LIVE' : 'DEMO_MODE',
+        syncStatus: 'DISABLED',
+        errorMessage: 'No reservation found to identify the inventory item.',
+      });
+      steps.push({
         step: 'Reservation → Odoo Inventory Fulfilment',
         entityCode: 'N/A',
         platform: 'ODOO',
-        targetModel: 'product.template',
+        targetModel: config.odooReservationModel,
         syncMode: config.odooEnabled ? 'LIVE' : 'DEMO_MODE',
         syncStatus: 'DISABLED',
         errorMessage: 'No reservation found for the program enrollment.',
@@ -875,10 +1057,19 @@ export async function syncFullDemoFlow() {
       errorMessage: 'No enrollment found. Create or approve Program Enrollment before syncing enrollment.',
     });
     steps.push({
+      step: 'Inventory Item → Odoo Inventory Item',
+      entityCode: 'N/A',
+      platform: 'ODOO',
+      targetModel: config.odooInventoryItemModel,
+      syncMode: config.odooEnabled ? 'LIVE' : 'DEMO_MODE',
+      syncStatus: 'DISABLED',
+      errorMessage: 'No enrollment or reservation found.',
+    });
+    steps.push({
       step: 'Reservation → Odoo Inventory Fulfilment',
       entityCode: 'N/A',
       platform: 'ODOO',
-      targetModel: 'product.template',
+      targetModel: config.odooReservationModel,
       syncMode: config.odooEnabled ? 'LIVE' : 'DEMO_MODE',
       syncStatus: 'DISABLED',
       errorMessage: 'No enrollment or reservation found.',
