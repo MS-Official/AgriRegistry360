@@ -5,6 +5,9 @@ import { CropRegistrationComponent } from './features/crops/crop-registration/cr
 import { EligibilityCheckComponent } from './features/eligibility/eligibility-check/eligibility-check.component';
 import { EligibilityDetailsComponent } from './features/eligibility/eligibility-details/eligibility-details.component';
 import { EligibilityListComponent } from './features/eligibility/eligibility-list/eligibility-list.component';
+import { EnrollmentCreateComponent } from './features/enrollments/enrollment-create/enrollment-create.component';
+import { EnrollmentDetailsComponent } from './features/enrollments/enrollment-details/enrollment-details.component';
+import { EnrollmentListComponent } from './features/enrollments/enrollment-list/enrollment-list.component';
 import { FarmerDetailsComponent } from './features/farmers/farmer-details/farmer-details.component';
 import { FarmerListComponent } from './features/farmers/farmer-list/farmer-list.component';
 import { FarmerRegistrationComponent } from './features/farmers/farmer-registration/farmer-registration.component';
@@ -26,4 +29,7 @@ export const routes: Routes = [
   { path: 'eligibility', component: EligibilityListComponent },
   { path: 'eligibility/check', component: EligibilityCheckComponent },
   { path: 'eligibility/:id', component: EligibilityDetailsComponent },
+  { path: 'enrollments', component: EnrollmentListComponent },
+  { path: 'enrollments/create', component: EnrollmentCreateComponent },
+  { path: 'enrollments/:id', component: EnrollmentDetailsComponent },
 ];

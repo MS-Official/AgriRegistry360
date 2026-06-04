@@ -1,6 +1,7 @@
 import express from 'express';
 import { getCropsByFarmerId } from '../controllers/crop.controller.js';
 import { getEligibilityByFarmerId } from '../controllers/eligibility.controller.js';
+import { getEnrollmentsByFarmerId } from '../controllers/enrollment.controller.js';
 import {
   getFarmerById,
   getFarmers,
@@ -17,6 +18,7 @@ farmerRouter.get('/', getFarmers);
 farmerRouter.get('/:farmerId/farms', getFarmsByFarmerId);
 farmerRouter.get('/:farmerId/crops', getCropsByFarmerId);
 farmerRouter.get('/:farmerId/eligibility', getEligibilityByFarmerId);
+farmerRouter.get('/:farmerId/enrollments', getEnrollmentsByFarmerId);
 farmerRouter.get('/:id', getFarmerById);
 farmerRouter.put('/:id', updateFarmer);
 farmerRouter.patch('/:id/verify', verifyFarmer);

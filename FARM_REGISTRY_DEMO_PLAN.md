@@ -70,7 +70,15 @@ WSO2 API Manager Exposure
 | GET | `/api/farmers/:farmerId/eligibility` | Implemented in Eligibility Check scope |
 | GET | `/api/farms/:farmId/eligibility` | Implemented in Eligibility Check scope |
 | GET | `/api/crops/:cropId/eligibility` | Implemented in Eligibility Check scope |
-| POST | `/api/programs/enroll` | Future module |
+| POST | `/api/enrollments` | Implemented in Program Enrollment scope |
+| GET | `/api/enrollments` | Implemented in Program Enrollment scope |
+| GET | `/api/enrollments/:id` | Implemented in Program Enrollment scope |
+| GET | `/api/farmers/:farmerId/enrollments` | Implemented in Program Enrollment scope |
+| GET | `/api/farms/:farmId/enrollments` | Implemented in Program Enrollment scope |
+| GET | `/api/crops/:cropId/enrollments` | Implemented in Program Enrollment scope |
+| GET | `/api/eligibility/:eligibilityId/enrollments` | Implemented in Program Enrollment scope |
+| PATCH | `/api/enrollments/:id/approval` | Implemented in Program Enrollment scope |
+| PATCH | `/api/enrollments/:id/cancel` | Implemented in Program Enrollment scope |
 | POST | `/api/odoo/inventory/reserve` | Future integration |
 | GET | `/api/reports/farm-registry-summary` | Future module |
 
@@ -118,7 +126,7 @@ WSO2 API Manager Exposure
 - Farmer Details crop summary
 - Demo crop seed data for Mohamed Ameen's demo farm
 
-### Eligibility Check: Current Module / In Progress
+### Eligibility Check: Completed
 
 - Fertilizer Subsidy Program 2026 rule evaluation
 - Farmer + Farm + Crop relationship validation
@@ -128,9 +136,18 @@ WSO2 API Manager Exposure
 - Eligibility check form, list, and details screens
 - Eligibility summaries on Farmer, Farm, and Crop details
 
+### Program Enrollment: Current Module / In Progress
+
+- Enrollment creation from eligible eligibility checks
+- Duplicate active enrollment prevention
+- Enrollment list with search
+- Enrollment details
+- Approval or rejection workflow
+- Enrollment cancellation
+- Linked enrollments shown on Eligibility Details
+
 ## Future Modules
 
-- Program Enrollment
 - Odoo Inventory Reservation / Distribution
 - WSO2 API Publishing
 - Reports

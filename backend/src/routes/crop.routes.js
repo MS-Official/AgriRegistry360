@@ -1,5 +1,6 @@
 import express from 'express';
 import { getEligibilityByCropId } from '../controllers/eligibility.controller.js';
+import { getEnrollmentsByCropId } from '../controllers/enrollment.controller.js';
 import {
   getCropById,
   getCrops,
@@ -13,6 +14,7 @@ export const cropRouter = express.Router();
 cropRouter.post('/register', registerCrop);
 cropRouter.get('/', getCrops);
 cropRouter.get('/:cropId/eligibility', getEligibilityByCropId);
+cropRouter.get('/:cropId/enrollments', getEnrollmentsByCropId);
 cropRouter.get('/:id', getCropById);
 cropRouter.put('/:id', updateCrop);
 cropRouter.patch('/:id/verify', verifyCrop);

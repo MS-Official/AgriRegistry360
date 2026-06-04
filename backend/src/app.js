@@ -4,6 +4,7 @@ import { config } from './config/env.js';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
 import { cropRouter } from './routes/crop.routes.js';
 import { eligibilityRouter } from './routes/eligibility.routes.js';
+import { enrollmentRouter } from './routes/enrollment.routes.js';
 import { farmRouter } from './routes/farm.routes.js';
 import { farmerRouter } from './routes/farmer.routes.js';
 
@@ -39,6 +40,7 @@ export function createApp() {
   app.use('/api/farms', farmRouter);
   app.use('/api/crops', cropRouter);
   app.use('/api/eligibility', eligibilityRouter);
+  app.use('/api/enrollments', enrollmentRouter);
 
   // TODO: Add future eligibility, program, Odoo, OpenG2P, WSO2, and report routes.
   app.use(notFoundHandler);

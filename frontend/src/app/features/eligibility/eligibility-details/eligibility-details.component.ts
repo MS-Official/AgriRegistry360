@@ -2,6 +2,14 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import {
+  approvalStatusClass,
+  approvalStatusLabel,
+  enrollmentStatusClass,
+  enrollmentStatusLabel,
+} from '../../enrollments/enrollment-labels';
+import { Enrollment } from '../../enrollments/enrollment.model';
+import { EnrollmentService } from '../../enrollments/enrollment.service';
+import {
   eligibilityStatusClass,
   eligibilityStatusLabel,
 } from '../eligibility-labels';
@@ -109,6 +117,54 @@ import { EligibilityService } from '../eligibility.service';
         </ul>
       </section>
 
+      <section style="margin-top: 22px;">
+        <div class="page-title" style="margin-bottom: 12px;">
+          <div>
+            <h1 style="font-size: 20px;">Linked Enrollments</h1>
+            <p>Program enrollments created from this eligibility result.</p>
+          </div>
+          <a class="button secondary" routerLink="/enrollments/create">Create Enrollment</a>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Enrollment Code</th>
+                <th>Entitlement</th>
+                <th>Enrollment Status</th>
+                <th>Approval Status</th>
+                <th>Enrolled By</th>
+                <th>Enrollment Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let enrollment of linkedEnrollments">
+                <td>
+                  <a [routerLink]="['/enrollments', enrollment._id]">{{ enrollment.enrollmentCode }}</a>
+                </td>
+                <td>{{ enrollment.entitlement }}</td>
+                <td>
+                  <span class="badge" [ngClass]="enrollmentStatusClass(enrollment.enrollmentStatus)">
+                    {{ enrollmentStatusLabel(enrollment.enrollmentStatus) }}
+                  </span>
+                </td>
+                <td>
+                  <span class="badge" [ngClass]="approvalStatusClass(enrollment.approvalStatus)">
+                    {{ approvalStatusLabel(enrollment.approvalStatus) }}
+                  </span>
+                </td>
+                <td>{{ enrollment.enrolledBy }}</td>
+                <td>{{ enrollment.enrollmentDate | date: 'medium' }}</td>
+              </tr>
+              <tr *ngIf="linkedEnrollments.length === 0">
+                <td colspan="6">No program enrollment created yet.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
       <div class="grid placeholder-grid">
         <div class="placeholder">
           <strong>Program Enrollment</strong>
@@ -132,14 +188,20 @@ import { EligibilityService } from '../eligibility.service';
 })
 export class EligibilityDetailsComponent implements OnInit {
   eligibility?: Eligibility;
+  linkedEnrollments: Enrollment[] = [];
   errorMessage = '';
 
   readonly eligibilityStatusLabel = eligibilityStatusLabel;
   readonly eligibilityStatusClass = eligibilityStatusClass;
+  readonly enrollmentStatusLabel = enrollmentStatusLabel;
+  readonly enrollmentStatusClass = enrollmentStatusClass;
+  readonly approvalStatusLabel = approvalStatusLabel;
+  readonly approvalStatusClass = approvalStatusClass;
 
   constructor(
     private readonly route: ActivatedRoute,
-    private readonly eligibilityService: EligibilityService
+    private readonly eligibilityService: EligibilityService,
+    private readonly enrollmentService: EnrollmentService
   ) {}
 
   ngOnInit(): void {
@@ -153,11 +215,22 @@ export class EligibilityDetailsComponent implements OnInit {
     this.eligibilityService.getEligibilityById(id).subscribe({
       next: (eligibility) => {
         this.eligibility = eligibility;
+        this.loadLinkedEnrollments(eligibility._id);
       },
       error: (error) => {
         this.errorMessage = error.error?.message || 'Unable to load eligibility details.';
       },
     });
   }
-}
 
+  private loadLinkedEnrollments(eligibilityId: string): void {
+    this.enrollmentService.getEnrollmentsByEligibilityId(eligibilityId).subscribe({
+      next: (enrollments) => {
+        this.linkedEnrollments = enrollments;
+      },
+      error: (error) => {
+        this.errorMessage = error.error?.message || 'Unable to load linked enrollments.';
+      },
+    });
+  }
+}
