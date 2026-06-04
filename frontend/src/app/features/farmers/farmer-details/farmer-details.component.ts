@@ -1,6 +1,9 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { FarmService } from '../../farms/farm.service';
+import { Farm } from '../../farms/farm.model';
+import { landSizeUnitLabel, ownershipTypeLabel } from '../../farms/farm-labels';
 import { Farmer } from '../farmer.model';
 import { FarmerService } from '../farmer.service';
 import {
@@ -78,6 +81,50 @@ import {
         </div>
       </div>
 
+      <section style="margin-top: 22px;">
+        <div class="page-title" style="margin-bottom: 12px;">
+          <div>
+            <h1 style="font-size: 20px;">Linked Farms / Land Records</h1>
+            <p>Farm and land records registered under this farmer.</p>
+          </div>
+          <a class="button secondary" routerLink="/farms/register">Register Farm / Land</a>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Farm Code</th>
+                <th>Land Size</th>
+                <th>Ownership Type</th>
+                <th>District</th>
+                <th>GN Division</th>
+                <th>Verification Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let linkedFarm of linkedFarms">
+                <td>
+                  <a [routerLink]="['/farms', linkedFarm._id]">{{ linkedFarm.farmCode }}</a>
+                </td>
+                <td>{{ linkedFarm.landSize }} {{ landSizeUnitLabel(linkedFarm.landSizeUnit) }}</td>
+                <td>{{ ownershipTypeLabel(linkedFarm.ownershipType) }}</td>
+                <td>{{ linkedFarm.district }}</td>
+                <td>{{ linkedFarm.gnDivision }}</td>
+                <td>
+                  <span class="badge" [ngClass]="verificationStatusClass(linkedFarm.verificationStatus)">
+                    {{ verificationStatusLabel(linkedFarm.verificationStatus) }}
+                  </span>
+                </td>
+              </tr>
+              <tr *ngIf="linkedFarms.length === 0">
+                <td colspan="6">No farm/land records registered yet.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
       <div class="grid placeholder-grid">
         <div class="placeholder">
           <strong>Linked Farms</strong>
@@ -105,15 +152,19 @@ import {
 })
 export class FarmerDetailsComponent implements OnInit {
   farmer?: Farmer;
+  linkedFarms: Farm[] = [];
   errorMessage = '';
 
   readonly farmerTypeLabel = farmerTypeLabel;
   readonly verificationStatusLabel = verificationStatusLabel;
   readonly verificationStatusClass = verificationStatusClass;
+  readonly ownershipTypeLabel = ownershipTypeLabel;
+  readonly landSizeUnitLabel = landSizeUnitLabel;
 
   constructor(
     private readonly route: ActivatedRoute,
-    private readonly farmerService: FarmerService
+    private readonly farmerService: FarmerService,
+    private readonly farmService: FarmService
   ) {}
 
   ngOnInit(): void {
@@ -127,11 +178,22 @@ export class FarmerDetailsComponent implements OnInit {
     this.farmerService.getFarmerById(id).subscribe({
       next: (farmer) => {
         this.farmer = farmer;
+        this.loadLinkedFarms(farmer._id);
       },
       error: (error) => {
         this.errorMessage = error.error?.message || 'Unable to load farmer details.';
       },
     });
   }
-}
 
+  private loadLinkedFarms(farmerId: string): void {
+    this.farmService.getFarmsByFarmerId(farmerId).subscribe({
+      next: (farms) => {
+        this.linkedFarms = farms;
+      },
+      error: (error) => {
+        this.errorMessage = error.error?.message || 'Unable to load linked farms.';
+      },
+    });
+  }
+}

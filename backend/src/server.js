@@ -1,6 +1,7 @@
 import { createApp } from './app.js';
 import { connectDb } from './config/db.js';
 import { config } from './config/env.js';
+import { seedDemoFarm } from './seed/demoFarm.seed.js';
 import { seedDemoFarmer } from './seed/demoFarmer.seed.js';
 
 async function startServer() {
@@ -8,6 +9,10 @@ async function startServer() {
 
   if (config.seedDemoFarmer) {
     await seedDemoFarmer();
+  }
+
+  if (config.seedDemoFarm) {
+    await seedDemoFarm();
   }
 
   const app = createApp();
@@ -20,4 +25,3 @@ startServer().catch((error) => {
   console.error('Failed to start backend', error);
   process.exit(1);
 });
-

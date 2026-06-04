@@ -12,6 +12,8 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
         <nav class="nav" aria-label="Main navigation">
           <a routerLink="/farmers/register" routerLinkActive="active">Register Farmer</a>
           <a routerLink="/farmers" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Farmer List</a>
+          <a routerLink="/farms/register" routerLinkActive="active">Register Farm / Land</a>
+          <a routerLink="/farms" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Farm / Land List</a>
         </nav>
       </header>
       <main class="content">
@@ -21,4 +23,3 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
   `,
 })
 export class AppComponent {}
-
