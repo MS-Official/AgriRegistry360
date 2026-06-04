@@ -79,6 +79,7 @@ export const openApiSpec = {
   servers: [{ url: 'http://localhost:5001', description: 'Local AgriRegistry360 backend' }],
   tags: [
     { name: 'Health', description: 'API health and metadata endpoints' },
+    { name: 'Dashboard', description: 'Client demo dashboard summary APIs' },
     { name: 'Farmer Registry', description: 'Farmer registry APIs' },
     { name: 'Farm / Land Registry', description: 'Farm and land registry APIs' },
     { name: 'Crop Registry', description: 'Crop registry APIs' },
@@ -100,6 +101,15 @@ export const openApiSpec = {
         tags: ['Health'],
         summary: 'Get WSO2-ready API catalog metadata',
         responses: { 200: okResponse },
+      },
+    },
+    '/api/dashboard/summary': {
+      get: {
+        tags: ['Dashboard'],
+        summary: 'Get client demo dashboard summary',
+        description:
+          'Returns aggregate counts used by the AgriRegistry360 client demo dashboard.',
+        responses: { 200: okResponse, 500: errorResponse },
       },
     },
     '/api/openg2p/mapping': {

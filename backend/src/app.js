@@ -6,6 +6,7 @@ import { apiCatalog } from './docs/apiCatalog.js';
 import { openApiSpec } from './docs/openapi.js';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
 import { cropRouter } from './routes/crop.routes.js';
+import { dashboardRouter } from './routes/dashboard.routes.js';
 import { eligibilityRouter } from './routes/eligibility.routes.js';
 import { enrollmentRouter } from './routes/enrollment.routes.js';
 import { farmRouter } from './routes/farm.routes.js';
@@ -55,6 +56,7 @@ export function createApp() {
   });
 
   app.use('/api/farmers', farmerRouter);
+  app.use('/api/dashboard', dashboardRouter);
   app.use('/api/farms', farmRouter);
   app.use('/api/crops', cropRouter);
   app.use('/api/eligibility', eligibilityRouter);

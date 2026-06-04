@@ -47,6 +47,7 @@ describe('App configuration', () => {
 
     assert.equal(response.body.openapi, '3.0.3');
     assert.equal(response.body.info.title, 'AgriRegistry360 Farm Registry API');
+    assert.ok(response.body.paths['/api/dashboard/summary']);
     assert.ok(response.body.paths['/api/farmers/register']);
     assert.ok(response.body.paths['/api/odoo/inventory/reservations']);
     assert.ok(response.body.paths['/api/openg2p/mapping']);

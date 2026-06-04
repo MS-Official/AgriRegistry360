@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { DemoDashboardComponent } from './features/dashboard/demo-dashboard/demo-dashboard.component';
 import { CropDetailsComponent } from './features/crops/crop-details/crop-details.component';
 import { CropListComponent } from './features/crops/crop-list/crop-list.component';
 import { CropRegistrationComponent } from './features/crops/crop-registration/crop-registration.component';
@@ -22,7 +23,8 @@ import { FarmListComponent } from './features/farms/farm-list/farm-list.componen
 import { FarmRegistrationComponent } from './features/farms/farm-registration/farm-registration.component';
 
 export const routes: Routes = [
-  { path: '', pathMatch: 'full', redirectTo: 'farmers' },
+  { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
+  { path: 'dashboard', component: DemoDashboardComponent },
   { path: 'farmers', component: FarmerListComponent },
   { path: 'farmers/register', component: FarmerRegistrationComponent },
   { path: 'farmers/:id', component: FarmerDetailsComponent },

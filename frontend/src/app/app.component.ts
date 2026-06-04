@@ -10,6 +10,7 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
       <header class="topbar">
         <div class="brand">AgriRegistry360</div>
         <nav class="nav" aria-label="Main navigation">
+          <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
           <a routerLink="/farmers/register" routerLinkActive="active">Register Farmer</a>
           <a routerLink="/farmers" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Farmer List</a>
           <a routerLink="/farms/register" routerLinkActive="active">Register Farm / Land</a>

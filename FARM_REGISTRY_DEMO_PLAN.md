@@ -8,20 +8,24 @@ A field officer registers Mohamed Ameen, a smallholder farmer from Anuradhapura.
 
 ```text
 Farmer Registration
-↓
+->
 Farm / Land Registration
-↓
+->
 Crop Registration
-↓
+->
 Farmer & Farm Verification
-↓
+->
 Eligibility Check
-↓
+->
 Program Enrollment
-↓
+->
 Odoo Inventory Reservation / Distribution
-↓
+->
 WSO2 API Manager Exposure
+->
+OpenG2P Mapping Preparation
+->
+Client Demo Dashboard
 ```
 
 ## Minimum Screens Needed
@@ -94,6 +98,7 @@ WSO2 API Manager Exposure
 | GET | `/api/docs.json` | Implemented in WSO2 API Manager Publishing Preparation scope |
 | GET | `/api/catalog` | Implemented in WSO2 API Manager Publishing Preparation scope |
 | GET | `/api/openg2p/mapping` | Implemented in OpenG2P Mapping Preparation scope |
+| GET | `/api/dashboard/summary` | Implemented in Client Demo Dashboard scope |
 | GET | `/api/reports/farm-registry-summary` | Future module |
 
 ## Platform Responsibilities
@@ -181,7 +186,7 @@ WSO2 API Manager Exposure
 - API catalog documentation
 - Angular WSO2 API Catalog page
 
-### OpenG2P Mapping Preparation: Current Module / In Progress
+### OpenG2P Mapping Preparation: Completed
 
 - OpenG2P mapping guide
 - OpenG2P mapping metadata endpoint at `/api/openg2p/mapping`
@@ -189,6 +194,18 @@ WSO2 API Manager Exposure
 - OpenG2P API catalog metadata
 - OpenG2P mapping page in Angular
 - Future integration phase plan and TODO placeholders
+
+### Client Demo Dashboard and Final Presentation Readiness: Current Module / In Progress
+
+- Demo dashboard page at `/dashboard`
+- Dashboard summary endpoint at `/api/dashboard/summary`
+- High-level statistics for registry, eligibility, enrollment, and inventory records
+- Visual workflow cards for the complete demo flow
+- Platform responsibility cards for OpenG2P, Odoo ERP, and WSO2 API Manager
+- Mohamed Ameen fertilizer subsidy story section
+- Quick links to core demo modules and API readiness endpoints
+- Client demo checklist
+- Final client demo readiness guide
 
 ## Future Modules
 
