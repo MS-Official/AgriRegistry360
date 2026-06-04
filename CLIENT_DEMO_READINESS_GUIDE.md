@@ -230,3 +230,23 @@ Client verification:
 - Search for `ENROLL`
 
 These records prove that AgriRegistry360 data has been pushed into the OpenG2P-compatible platform.
+
+## Installing the AgriRegistry360 Odoo Addon
+
+Install the demo addon so the client sees AgriRegistry360 as a proper Odoo application with menus for Farmers, Farms / Lands, Crops, Eligibility Checks, Program Enrollments, and Inventory Reservations.
+
+Install in Odoo ERP:
+1. Open `http://localhost:8069`.
+2. Go to **Apps**.
+3. Click **Update Apps List**.
+4. Search `AgriRegistry360`.
+5. Activate **AgriRegistry360 Farm Registry**.
+
+Install in OpenG2P-compatible Odoo:
+1. Open `http://localhost:8070`.
+2. Go to **Apps**.
+3. Click **Update Apps List**.
+4. Search `AgriRegistry360`.
+5. Activate **AgriRegistry360 Farm Registry**.
+
+After installation, rerun the full sync from Platform Sync Center. Records should appear under the **AgriRegistry360** top-level Odoo menu. If the addon is not installed, fallback Contacts sync remains available.

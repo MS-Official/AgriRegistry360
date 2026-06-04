@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_agriregistry_farmer_tree" model="ir.ui.view">
+        <field name="name">agriregistry.farmer.tree</field>
+        <field name="model">agriregistry.farmer</field>
+        <field name="arch" type="xml">
+            <tree string="Farmer Registry">
+                <field name="farmer_code"/>
+                <field name="full_name"/>
+                <field name="national_id"/>
+                <field name="mobile_number"/>
+                <field name="district"/>
+                <field name="verification_status"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_agriregistry_farmer_form" model="ir.ui.view">
+        <field name="name">agriregistry.farmer.form</field>
+        <field name="model">agriregistry.farmer</field>
+        <field name="arch" type="xml">
+            <form string="Farmer">
+                <sheet>
+                    <group>
+                        <field name="farmer_code"/>
+                        <field name="full_name"/>
+                        <field name="national_id"/>
+                        <field name="mobile_number"/>
+                        <field name="district"/>
+                        <field name="gn_division"/>
+                        <field name="farmer_type"/>
+                        <field name="verification_status"/>
+                        <field name="registered_by"/>
+                        <field name="external_mongo_id"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_agriregistry_farmer" model="ir.actions.act_window">
+        <field name="name">Farmers</field>
+        <field name="res_model">agriregistry.farmer</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="view_agriregistry_farm_tree" model="ir.ui.view">
+        <field name="name">agriregistry.farm.tree</field>
+        <field name="model">agriregistry.farm</field>
+        <field name="arch" type="xml">
+            <tree string="Farm / Land Registry">
+                <field name="farm_code"/>
+                <field name="farmer_code"/>
+                <field name="farmer_name"/>
+                <field name="district"/>
+                <field name="ownership_type"/>
+                <field name="land_size"/>
+                <field name="land_size_unit"/>
+                <field name="verification_status"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_agriregistry_farm_form" model="ir.ui.view">
+        <field name="name">agriregistry.farm.form</field>
+        <field name="model">agriregistry.farm</field>
+        <field name="arch" type="xml">
+            <form string="Farm / Land">
+                <sheet>
+                    <group>
+                        <field name="farm_code"/>
+                        <field name="farmer_code"/>
+                        <field name="farmer_name"/>
+                        <field name="district"/>
+                        <field name="gn_division"/>
+                        <field name="ownership_type"/>
+                        <field name="land_size"/>
+                        <field name="land_size_unit"/>
+                        <field name="verification_status"/>
+                        <field name="external_mongo_id"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_agriregistry_farm" model="ir.actions.act_window">
+        <field name="name">Farms / Lands</field>
+        <field name="res_model">agriregistry.farm</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="view_agriregistry_crop_tree" model="ir.ui.view">
+        <field name="name">agriregistry.crop.tree</field>
+        <field name="model">agriregistry.crop</field>
+        <field name="arch" type="xml">
+            <tree string="Crop Registry">
+                <field name="crop_code"/>
+                <field name="farm_code"/>
+                <field name="farmer_code"/>
+                <field name="crop_type"/>
+                <field name="season"/>
+                <field name="season_year"/>
+                <field name="cultivation_area"/>
+                <field name="verification_status"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_agriregistry_crop_form" model="ir.ui.view">
+        <field name="name">agriregistry.crop.form</field>
+        <field name="model">agriregistry.crop</field>
+        <field name="arch" type="xml">
+            <form string="Crop">
+                <sheet>
+                    <group>
+                        <field name="crop_code"/>
+                        <field name="farm_code"/>
+                        <field name="farmer_code"/>
+                        <field name="crop_type"/>
+                        <field name="season"/>
+                        <field name="season_year"/>
+                        <field name="cultivation_area"/>
+                        <field name="cultivation_area_unit"/>
+                        <field name="expected_yield"/>
+                        <field name="verification_status"/>
+                        <field name="external_mongo_id"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_agriregistry_crop" model="ir.actions.act_window">
+        <field name="name">Crops</field>
+        <field name="res_model">agriregistry.crop</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="view_agriregistry_eligibility_tree" model="ir.ui.view">
+        <field name="name">agriregistry.eligibility.tree</field>
+        <field name="model">agriregistry.eligibility</field>
+        <field name="arch" type="xml">
+            <tree string="Eligibility Checks">
+                <field name="eligibility_code"/>
+                <field name="farmer_code"/>
+                <field name="farm_code"/>
+                <field name="crop_code"/>
+                <field name="program_name"/>
+                <field name="eligibility_status"/>
+                <field name="recommended_entitlement"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_agriregistry_eligibility_form" model="ir.ui.view">
+        <field name="name">agriregistry.eligibility.form</field>
+        <field name="model">agriregistry.eligibility</field>
+        <field name="arch" type="xml">
+            <form string="Eligibility Check">
+                <sheet>
+                    <group>
+                        <field name="eligibility_code"/>
+                        <field name="farmer_code"/>
+                        <field name="farm_code"/>
+                        <field name="crop_code"/>
+                        <field name="program_code"/>
+                        <field name="program_name"/>
+                        <field name="eligibility_status"/>
+                        <field name="recommended_entitlement"/>
+                        <field name="checked_by"/>
+                        <field name="external_mongo_id"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_agriregistry_eligibility" model="ir.actions.act_window">
+        <field name="name">Eligibility Checks</field>
+        <field name="res_model">agriregistry.eligibility</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="view_agriregistry_enrollment_tree" model="ir.ui.view">
+        <field name="name">agriregistry.enrollment.tree</field>
+        <field name="model">agriregistry.enrollment</field>
+        <field name="arch" type="xml">
+            <tree string="Program Enrollments">
+                <field name="enrollment_code"/>
+                <field name="eligibility_code"/>
+                <field name="farmer_code"/>
+                <field name="program_name"/>
+                <field name="entitlement"/>
+                <field name="enrollment_status"/>
+                <field name="approval_status"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_agriregistry_enrollment_form" model="ir.ui.view">
+        <field name="name">agriregistry.enrollment.form</field>
+        <field name="model">agriregistry.enrollment</field>
+        <field name="arch" type="xml">
+            <form string="Program Enrollment">
+                <sheet>
+                    <group>
+                        <field name="enrollment_code"/>
+                        <field name="eligibility_code"/>
+                        <field name="farmer_code"/>
+                        <field name="program_code"/>
+                        <field name="program_name"/>
+                        <field name="entitlement"/>
+                        <field name="enrollment_status"/>
+                        <field name="approval_status"/>
+                        <field name="enrolled_by"/>
+                        <field name="external_mongo_id"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_agriregistry_enrollment" model="ir.actions.act_window">
+        <field name="name">Program Enrollments</field>
+        <field name="res_model">agriregistry.enrollment</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="view_agriregistry_inventory_reservation_tree" model="ir.ui.view">
+        <field name="name">agriregistry.inventory.reservation.tree</field>
+        <field name="model">agriregistry.inventory.reservation</field>
+        <field name="arch" type="xml">
+            <tree string="Inventory Reservations">
+                <field name="reservation_code"/>
+                <field name="enrollment_code"/>
+                <field name="farmer_code"/>
+                <field name="item_code"/>
+                <field name="item_name"/>
+                <field name="reserved_quantity"/>
+                <field name="reservation_status"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_agriregistry_inventory_reservation_form" model="ir.ui.view">
+        <field name="name">agriregistry.inventory.reservation.form</field>
+        <field name="model">agriregistry.inventory.reservation</field>
+        <field name="arch" type="xml">
+            <form string="Inventory Reservation">
+                <sheet>
+                    <group>
+                        <field name="reservation_code"/>
+                        <field name="enrollment_code"/>
+                        <field name="farmer_code"/>
+                        <field name="item_code"/>
+                        <field name="item_name"/>
+                        <field name="reserved_quantity"/>
+                        <field name="reservation_status"/>
+                        <field name="reserved_by"/>
+                        <field name="external_mongo_id"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_agriregistry_inventory_reservation" model="ir.actions.act_window">
+        <field name="name">Inventory Reservations</field>
+        <field name="res_model">agriregistry.inventory.reservation</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="menu_agriregistry360_root" name="AgriRegistry360" sequence="20"/>
+    <menuitem id="menu_agriregistry360_farmers" name="Farmers" parent="menu_agriregistry360_root" action="action_agriregistry_farmer" sequence="10"/>
+    <menuitem id="menu_agriregistry360_farms" name="Farms / Lands" parent="menu_agriregistry360_root" action="action_agriregistry_farm" sequence="20"/>
+    <menuitem id="menu_agriregistry360_crops" name="Crops" parent="menu_agriregistry360_root" action="action_agriregistry_crop" sequence="30"/>
+    <menuitem id="menu_agriregistry360_eligibility" name="Eligibility Checks" parent="menu_agriregistry360_root" action="action_agriregistry_eligibility" sequence="40"/>
+    <menuitem id="menu_agriregistry360_enrollments" name="Program Enrollments" parent="menu_agriregistry360_root" action="action_agriregistry_enrollment" sequence="50"/>
+    <menuitem id="menu_agriregistry360_reservations" name="Inventory Reservations" parent="menu_agriregistry360_root" action="action_agriregistry_inventory_reservation" sequence="60"/>
+</odoo>

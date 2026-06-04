@@ -58,6 +58,7 @@ async function syncOpenG2PRecord({
   entityCode,
   targetModel,
   targetPayload,
+  targetLookupField = null,
   fallbackPayload,
   fallbackExternalPrefix,
   realResponseKey = 'openG2PId',
@@ -82,7 +83,21 @@ async function syncOpenG2PRecord({
     const targetExists = await openG2PClient.checkModelExists(targetModel);
     if (targetExists) {
       try {
-        const newId = await openG2PClient.createRecord(targetModel, targetPayload);
+        let action = 'created';
+        let recordId;
+        if (targetLookupField) {
+          const existing = await openG2PClient.searchRead(targetModel, [[targetLookupField, '=', entityCode]], ['id']);
+          if (existing.length > 0) {
+            await openG2PClient.writeRecord(targetModel, existing[0].id, targetPayload);
+            action = 'updated';
+            recordId = existing[0].id;
+          }
+        }
+
+        if (!recordId) {
+          recordId = await openG2PClient.createRecord(targetModel, targetPayload);
+        }
+
         return await createOrUpdateSyncLog({
           entityType,
           entityId,
@@ -91,8 +106,8 @@ async function syncOpenG2PRecord({
           targetModel,
           syncStatus: 'SYNCED',
           requestPayload: targetPayload,
-          responsePayload: { success: true, [realResponseKey]: newId, action: 'created', model: targetModel },
-          targetExternalId: String(newId),
+          responsePayload: { success: true, [realResponseKey]: recordId, action, model: targetModel },
+          targetExternalId: String(recordId),
         });
       } catch (targetError) {
         const fallbackModel = config.openG2PFallbackModel;
@@ -198,7 +213,7 @@ export async function syncFarmerToOdoo(farmerId) {
     throw new Error('Farmer not found');
   }
 
-  const payload = {
+  const partnerPayload = {
     name: farmer.fullName,
     ref: farmer.farmerCode,
     vat: farmer.nationalId,
@@ -207,25 +222,47 @@ export async function syncFarmerToOdoo(farmerId) {
     city: farmer.district,
     comment: `Farmer Type: ${farmer.farmerType}, Verification Status: ${farmer.verificationStatus}`,
   };
+  const registryPayload = {
+    farmer_code: farmer.farmerCode,
+    full_name: farmer.fullName,
+    national_id: farmer.nationalId,
+    mobile_number: farmer.mobileNumber,
+    district: farmer.district,
+    gn_division: farmer.gnDivision || '',
+    farmer_type: farmer.farmerType,
+    verification_status: farmer.verificationStatus,
+    registered_by: farmer.registeredBy,
+    external_mongo_id: farmer._id.toString(),
+  };
 
-  const model = 'res.partner';
+  const model = config.odooFarmerModel;
   const mode = config.odooEnabled ? 'SYNCED' : 'DEMO_MODE';
 
   try {
     let externalId = '';
     let response = null;
+    let targetModel = model;
+    let requestPayload = registryPayload;
 
     if (config.odooEnabled) {
-      // Check if partner with reference already exists
-      const existing = await odooClient.searchRead(model, [['ref', '=', farmer.farmerCode]], ['id']);
-      if (existing && existing.length > 0) {
-        externalId = String(existing[0].id);
-        await odooClient.write(model, existing[0].id, payload);
-        response = { success: true, action: 'update', odooId: existing[0].id };
+      const registryModelExists = await odooClient.checkModelExists(model);
+      if (registryModelExists) {
+        const upsert = await odooClient.upsertByField(model, 'farmer_code', farmer.farmerCode, registryPayload);
+        externalId = String(upsert.id);
+        response = { success: true, action: upsert.action, odooId: upsert.id, model };
       } else {
-        const newId = await odooClient.create(model, payload);
-        externalId = String(newId);
-        response = { success: true, action: 'create', odooId: newId };
+        targetModel = 'res.partner';
+        requestPayload = partnerPayload;
+        const existing = await odooClient.searchRead(targetModel, [['ref', '=', farmer.farmerCode]], ['id']);
+        if (existing && existing.length > 0) {
+          externalId = String(existing[0].id);
+          await odooClient.write(targetModel, existing[0].id, partnerPayload);
+          response = { success: true, action: 'updated', odooId: existing[0].id, model: targetModel };
+        } else {
+          const newId = await odooClient.create(targetModel, partnerPayload);
+          externalId = String(newId);
+          response = { success: true, action: 'created', odooId: newId, model: targetModel };
+        }
       }
     } else {
       externalId = `DEMO-ODOO-FARMER-${farmer.farmerCode}`;
@@ -237,9 +274,9 @@ export async function syncFarmerToOdoo(farmerId) {
       entityId: farmer._id.toString(),
       entityCode: farmer.farmerCode,
       platform: 'ODOO',
-      targetModel: model,
+      targetModel,
       syncStatus: mode,
-      requestPayload: payload,
+      requestPayload,
       responsePayload: response,
       targetExternalId: externalId,
     });
@@ -253,7 +290,7 @@ export async function syncFarmerToOdoo(farmerId) {
       platform: 'ODOO',
       targetModel: model,
       syncStatus: 'FAILED',
-      requestPayload: payload,
+      requestPayload: registryPayload,
       responsePayload: null,
       errorMessage: error.message,
     });
@@ -279,6 +316,18 @@ export async function syncFarmerToOpenG2P(farmerId) {
     city: farmer.district,
     comment: `G2P Registrant. Type: ${farmer.farmerType}`,
   };
+  const registryPayload = {
+    farmer_code: farmer.farmerCode,
+    full_name: farmer.fullName,
+    national_id: farmer.nationalId,
+    mobile_number: farmer.mobileNumber,
+    district: farmer.district,
+    gn_division: farmer.gnDivision || '',
+    farmer_type: farmer.farmerType,
+    verification_status: farmer.verificationStatus,
+    registered_by: farmer.registeredBy,
+    external_mongo_id: farmer._id.toString(),
+  };
 
   const model = config.openG2PRegistrantModel;
   const mode = config.openG2PEnabled ? 'SYNCED' : 'DEMO_MODE';
@@ -289,22 +338,28 @@ export async function syncFarmerToOpenG2P(farmerId) {
     let targetModelUsed = model;
     let warning = '';
     let syncStatus = mode;
+    let requestPayload = config.openG2PEnabled ? registryPayload : payload;
 
     if (config.openG2PEnabled) {
       const exists = await openG2PClient.checkModelExists(model);
       if (exists) {
-        const existing = await openG2PClient.searchRead(model, [['ref', '=', farmer.farmerCode]], ['id', 'name', 'ref']);
+        const lookupField = model === 'res.partner' ? 'ref' : 'farmer_code';
+        const writePayload = model === 'res.partner' ? payload : registryPayload;
+        requestPayload = writePayload;
+        const existing = await openG2PClient.searchRead(model, [[lookupField, '=', farmer.farmerCode]], ['id']);
         if (existing.length > 0) {
-          await openG2PClient.writeRecord(model, existing[0].id, payload);
+          await openG2PClient.writeRecord(model, existing[0].id, writePayload);
           externalId = String(existing[0].id);
           response = { success: true, action: 'updated', openG2PId: existing[0].id };
         } else {
-          const newId = await openG2PClient.createRecord(model, payload);
+          const newId = await openG2PClient.createRecord(model, writePayload);
           externalId = String(newId);
           response = { success: true, action: 'created', openG2PId: newId };
         }
+        targetModelUsed = model;
       } else {
         targetModelUsed = config.openG2PFallbackModel;
+        requestPayload = payload;
         const fallback = await openG2PClient.upsertVisibleFallbackRecord(payload, targetModelUsed);
         externalId = `G2P-FALLBACK-PARTNER-${fallback.id}`;
         warning = OPENG2P_FALLBACK_MESSAGE;
@@ -323,7 +378,7 @@ export async function syncFarmerToOpenG2P(farmerId) {
       platform: 'OPENG2P',
       targetModel: targetModelUsed,
       syncStatus: syncStatus,
-      requestPayload: payload,
+      requestPayload,
       responsePayload: response,
       targetExternalId: externalId,
       errorMessage: warning,
@@ -362,13 +417,26 @@ export async function syncFarmToOpenG2P(farmId) {
     city: farm.district || '',
     comment: `Ownership: ${farm.ownershipType}, Size: ${farm.landSize} ${farm.landSizeUnit}, Farmer Ref: ${farm.farmerCode}`,
   };
+  const registryPayload = {
+    farm_code: farm.farmCode,
+    farmer_code: farm.farmerCode,
+    farmer_name: farm.farmerName,
+    district: farm.district,
+    gn_division: farm.gnDivision,
+    ownership_type: farm.ownershipType,
+    land_size: farm.landSize,
+    land_size_unit: farm.landSizeUnit,
+    verification_status: farm.verificationStatus,
+    external_mongo_id: farm._id.toString(),
+  };
 
   return await syncOpenG2PRecord({
     entityType: 'FARM',
     entityId: farm._id.toString(),
     entityCode: farm.farmCode,
     targetModel: config.openG2PFarmModel,
-    targetPayload: payload,
+    targetPayload: registryPayload,
+    targetLookupField: 'farm_code',
     fallbackPayload: {
       ...payload,
       comment: `AgriRegistry Farm\n${payload.comment}\nDistrict: ${farm.district}\nGN Division: ${farm.gnDivision}\nVerification: ${farm.verificationStatus}`,
@@ -392,13 +460,27 @@ export async function syncCropToOpenG2P(cropId) {
     ref: crop.cropCode,
     comment: `Season: ${crop.season}, Expected Yield: ${crop.expectedYield} ${crop.expectedYieldUnit}, Farm Ref: ${crop.farmCode}`,
   };
+  const registryPayload = {
+    crop_code: crop.cropCode,
+    farm_code: crop.farmCode,
+    farmer_code: crop.farmerCode,
+    crop_type: crop.cropType,
+    season: crop.season,
+    season_year: crop.seasonYear,
+    cultivation_area: crop.cultivationArea,
+    cultivation_area_unit: crop.cultivationAreaUnit,
+    expected_yield: crop.expectedYield,
+    verification_status: crop.verificationStatus,
+    external_mongo_id: crop._id.toString(),
+  };
 
   return await syncOpenG2PRecord({
     entityType: 'CROP',
     entityId: crop._id.toString(),
     entityCode: crop.cropCode,
     targetModel: config.openG2PCropModel,
-    targetPayload: payload,
+    targetPayload: registryPayload,
+    targetLookupField: 'crop_code',
     fallbackPayload: {
       ...payload,
       city: '',
@@ -419,10 +501,16 @@ export async function syncEnrollmentToOpenG2P(enrollmentId) {
   }
 
   const payload = {
-    program_id: enrollment.programCode,
-    partner_id: enrollment.farmerCode,
-    membership_ref: enrollment.enrollmentCode,
-    state: enrollment.enrollmentStatus,
+    enrollment_code: enrollment.enrollmentCode,
+    eligibility_code: enrollment.eligibilityCode,
+    farmer_code: enrollment.farmerCode,
+    program_code: enrollment.programCode,
+    program_name: enrollment.programName,
+    entitlement: enrollment.entitlement,
+    enrollment_status: enrollment.enrollmentStatus,
+    approval_status: enrollment.approvalStatus,
+    enrolled_by: enrollment.enrolledBy,
+    external_mongo_id: enrollment._id.toString(),
   };
 
   return await syncOpenG2PRecord({
@@ -431,6 +519,7 @@ export async function syncEnrollmentToOpenG2P(enrollmentId) {
     entityCode: enrollment.enrollmentCode,
     targetModel: config.openG2PEnrollmentModel,
     targetPayload: payload,
+    targetLookupField: 'enrollment_code',
     fallbackPayload: {
       name: `${enrollment.enrollmentCode} - ${enrollment.farmerName} - ${enrollment.programName}`,
       ref: enrollment.enrollmentCode,
@@ -452,14 +541,16 @@ export async function syncEligibilityToOpenG2P(eligibilityId) {
   }
 
   const payload = {
-    name: `${eligibility.eligibilityCode} - ${eligibility.programName} - ${eligibility.eligibilityStatus}`,
-    ref: eligibility.eligibilityCode,
-    farmer_ref: eligibility.farmerCode,
-    farm_ref: eligibility.farmCode,
-    crop_ref: eligibility.cropCode,
-    program_ref: eligibility.programCode,
-    state: eligibility.eligibilityStatus,
+    eligibility_code: eligibility.eligibilityCode,
+    farmer_code: eligibility.farmerCode,
+    farm_code: eligibility.farmCode,
+    crop_code: eligibility.cropCode,
+    program_code: eligibility.programCode,
+    program_name: eligibility.programName,
+    eligibility_status: eligibility.eligibilityStatus,
     recommended_entitlement: eligibility.recommendedEntitlement,
+    checked_by: eligibility.checkedBy,
+    external_mongo_id: eligibility._id.toString(),
   };
 
   return await syncOpenG2PRecord({
@@ -468,6 +559,7 @@ export async function syncEligibilityToOpenG2P(eligibilityId) {
     entityCode: eligibility.eligibilityCode,
     targetModel: config.openG2PEligibilityModel,
     targetPayload: payload,
+    targetLookupField: 'eligibility_code',
     fallbackPayload: {
       name: `${eligibility.eligibilityCode} - ${eligibility.programName} - ${eligibility.eligibilityStatus}`,
       ref: eligibility.eligibilityCode,
@@ -497,8 +589,19 @@ export async function syncReservationToOdoo(reservationId) {
     quantity: reservation.reservedQuantity,
     state: reservation.reservationStatus,
   };
+  const registryPayload = {
+    reservation_code: reservation.reservationCode,
+    enrollment_code: reservation.enrollmentCode,
+    farmer_code: reservation.farmerCode,
+    item_code: reservation.itemCode,
+    item_name: reservation.itemName,
+    reserved_quantity: reservation.reservedQuantity,
+    reservation_status: reservation.reservationStatus,
+    reserved_by: reservation.reservedBy,
+    external_mongo_id: reservation._id.toString(),
+  };
 
-  const model = 'product.template';
+  const model = config.odooReservationModel;
   const mode = config.odooEnabled ? 'SYNCED' : 'DEMO_MODE';
 
   try {
@@ -506,28 +609,27 @@ export async function syncReservationToOdoo(reservationId) {
     let response = null;
     let warning = '';
     let syncStatus = mode;
+    let targetModel = model;
+    let requestPayload = registryPayload;
 
     if (config.odooEnabled) {
       try {
-        // Check if product exists in Odoo. If not, create it
-        const existingProduct = await odooClient.searchRead('product.product', [['default_code', '=', reservation.itemCode]], ['id']);
-        let productId = existingProduct && existingProduct.length > 0 ? existingProduct[0].id : null;
-        if (!productId) {
-          productId = await odooClient.create('product.product', {
-            name: reservation.itemName,
-            default_code: reservation.itemCode,
-            type: 'product',
-          });
+        const registryModelExists = await odooClient.checkModelExists(model);
+        if (registryModelExists) {
+          const upsert = await odooClient.upsertByField(model, 'reservation_code', reservation.reservationCode, registryPayload);
+          externalId = `ODOO-RESERVE-${upsert.id}`;
+          response = { success: true, action: upsert.action, odooId: upsert.id, model };
+        } else {
+          targetModel = 'res.partner';
+          requestPayload = {
+            name: `Reservation: ${reservation.reservationCode} - ${reservation.itemName}`,
+            ref: reservation.reservationCode,
+            comment: `Reserved ${reservation.reservedQuantity} of ${reservation.itemName} for ${reservation.farmerName}. Enrollment: ${reservation.enrollmentCode}`,
+          };
+          const upsert = await odooClient.upsertByField(targetModel, 'ref', reservation.reservationCode, requestPayload);
+          externalId = `ODOO-RESERVE-${upsert.id}`;
+          response = { success: true, action: upsert.action, odooId: upsert.id, model: targetModel };
         }
-
-        // Record reservation details in product.template or similar log
-        const newId = await odooClient.create('res.partner', {
-          name: `Reservation: ${reservation.reservationCode} - ${reservation.itemName}`,
-          comment: `Reserved ${reservation.reservedQuantity} of ${reservation.itemName} for ${reservation.farmerName}. Enrollment: ${reservation.enrollmentCode}`,
-        });
-
-        externalId = `ODOO-RESERVE-${newId}`;
-        response = { success: true, odooId: newId, productId };
       } catch (innerError) {
         externalId = `DEMO-ODOO-RESERVE-${reservation.reservationCode}`;
         response = { success: true, mode: 'demo_fallback', simulatedId: externalId };
@@ -544,9 +646,9 @@ export async function syncReservationToOdoo(reservationId) {
       entityId: reservation._id.toString(),
       entityCode: reservation.reservationCode,
       platform: 'ODOO',
-      targetModel: model,
+      targetModel,
       syncStatus: syncStatus,
-      requestPayload: payload,
+      requestPayload,
       responsePayload: response,
       targetExternalId: externalId,
       errorMessage: warning,
@@ -561,7 +663,7 @@ export async function syncReservationToOdoo(reservationId) {
       platform: 'ODOO',
       targetModel: model,
       syncStatus: 'FAILED',
-      requestPayload: payload,
+      requestPayload: registryPayload,
       responsePayload: null,
       errorMessage: error.message,
     });

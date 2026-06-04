@@ -17,6 +17,8 @@ export const config = {
   odooDb: process.env.ODOO_DB || 'agriregistry360',
   odooUsername: process.env.ODOO_USERNAME || 'admin',
   odooPassword: process.env.ODOO_PASSWORD || 'admin',
+  odooFarmerModel: process.env.ODOO_FARMER_MODEL || 'agriregistry.farmer',
+  odooReservationModel: process.env.ODOO_RESERVATION_MODEL || 'agriregistry.inventory.reservation',
 
   // OpenG2P Config
   openG2PEnabled: process.env.OPENG2P_ENABLED === 'true',
@@ -24,12 +26,12 @@ export const config = {
   openG2PDb: process.env.OPENG2P_DB || 'openg2p',
   openG2PUsername: process.env.OPENG2P_USERNAME || 'admin',
   openG2PPassword: process.env.OPENG2P_PASSWORD || 'admin',
-  openG2PRegistrantModel: process.env.OPENG2P_REGISTRANT_MODEL || 'res.partner',
+  openG2PRegistrantModel: process.env.OPENG2P_REGISTRANT_MODEL || 'agriregistry.farmer',
   openG2PProgramModel: process.env.OPENG2P_PROGRAM_MODEL || 'g2p.program',
-  openG2PEnrollmentModel: process.env.OPENG2P_ENROLLMENT_MODEL || 'g2p.program.membership',
-  openG2PFarmModel: process.env.OPENG2P_FARM_MODEL || 'g2p.agriculture.farm',
-  openG2PCropModel: process.env.OPENG2P_CROP_MODEL || 'g2p.agriculture.crop',
-  openG2PEligibilityModel: process.env.OPENG2P_ELIGIBILITY_MODEL || 'g2p.eligibility.check',
+  openG2PEnrollmentModel: process.env.OPENG2P_ENROLLMENT_MODEL || 'agriregistry.enrollment',
+  openG2PFarmModel: process.env.OPENG2P_FARM_MODEL || 'agriregistry.farm',
+  openG2PCropModel: process.env.OPENG2P_CROP_MODEL || 'agriregistry.crop',
+  openG2PEligibilityModel: process.env.OPENG2P_ELIGIBILITY_MODEL || 'agriregistry.eligibility',
   openG2PFallbackModel: process.env.OPENG2P_FALLBACK_MODEL || 'res.partner',
 
   // WSO2 Config

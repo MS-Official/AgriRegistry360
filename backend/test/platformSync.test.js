@@ -220,8 +220,8 @@ describe('Platform Sync API', () => {
     assert.equal(response.body.platform, 'OPENG2P');
     assert.equal(response.body.data.enabled, false);
     assert.equal(response.body.data.fallbackModel, 'res.partner');
-    assert.ok(response.body.data.models.some((model) => model.modelName === 'g2p.agriculture.farm'));
-    assert.ok(response.body.data.models.some((model) => model.modelName === 'g2p.eligibility.check'));
+    assert.ok(response.body.data.models.some((model) => model.modelName === 'agriregistry.farm'));
+    assert.ok(response.body.data.models.some((model) => model.modelName === 'agriregistry.eligibility'));
   });
 
   it('syncs farm to OpenG2P visible fallback when PBMS agriculture model is unavailable', async () => {

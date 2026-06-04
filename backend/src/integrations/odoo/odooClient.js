@@ -134,6 +134,46 @@ export const odooClient = {
   },
 
   /**
+   * Check if an Odoo model exists.
+   */
+  async checkModelExists(model) {
+    if (!config.odooEnabled) {
+      return false;
+    }
+
+    try {
+      const uid = await this.authenticate();
+      if (!uid) return false;
+      const count = await callOdooRpc('object', 'execute_kw', [
+        config.odooDb,
+        uid,
+        config.odooPassword,
+        'ir.model',
+        'search_count',
+        [[['model', '=', model]]],
+      ]);
+      return count > 0;
+    } catch (error) {
+      return false;
+    }
+  },
+
+  /**
+   * Upsert by a configured external/code field.
+   */
+  async upsertByField(model, lookupField, lookupValue, values) {
+    const existing = await this.searchRead(model, [[lookupField, '=', lookupValue]], ['id']);
+
+    if (existing.length > 0) {
+      await this.write(model, existing[0].id, values);
+      return { action: 'updated', id: existing[0].id, model };
+    }
+
+    const id = await this.create(model, values);
+    return { action: 'created', id, model };
+  },
+
+  /**
    * Check connection to Odoo database by trying to authenticate.
    */
   async checkConnection() {

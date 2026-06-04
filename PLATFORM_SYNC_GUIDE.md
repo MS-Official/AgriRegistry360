@@ -38,6 +38,8 @@ ODOO_URL=http://localhost:8069
 ODOO_DB=agriregistry360
 ODOO_USERNAME=admin
 ODOO_PASSWORD=admin
+ODOO_FARMER_MODEL=agriregistry.farmer
+ODOO_RESERVATION_MODEL=agriregistry.inventory.reservation
 
 # OpenG2P Integration (Odoo-based)
 OPENG2P_ENABLED=false
@@ -45,9 +47,13 @@ OPENG2P_URL=http://localhost:8069
 OPENG2P_DB=openg2p
 OPENG2P_USERNAME=admin
 OPENG2P_PASSWORD=admin
-OPENG2P_REGISTRANT_MODEL=res.partner
+OPENG2P_REGISTRANT_MODEL=agriregistry.farmer
 OPENG2P_PROGRAM_MODEL=g2p.program
-OPENG2P_ENROLLMENT_MODEL=g2p.program.membership
+OPENG2P_ENROLLMENT_MODEL=agriregistry.enrollment
+OPENG2P_FARM_MODEL=agriregistry.farm
+OPENG2P_CROP_MODEL=agriregistry.crop
+OPENG2P_ELIGIBILITY_MODEL=agriregistry.eligibility
+OPENG2P_FALLBACK_MODEL=res.partner
 
 # WSO2 API Manager Gateway
 WSO2_ENABLED=false
@@ -108,20 +114,22 @@ docker compose up -d --force-recreate backend
 ## OpenG2P Sync Mapping
 
 ### Farmer Registry
-* **Target Model:** `res.partner` (mapped as OpenG2P registrant)
-* **Mapping:** Matches Odoo Farmer Sync, classifying the partner as a Welfare Registrant.
+* **Target Model:** `agriregistry.farmer` when the demo addon is installed, otherwise fallback to `res.partner`.
+* **Mapping:** Matches AgriRegistry360 farmer fields for client-visible verification in OpenG2P-compatible Odoo.
 
 ### Farm & Crop registries
-* **Target Model:** `res.partner` (farm/crop notes details)
-* **Mapping:** Extends the parent registrant contact details or logs registry boundaries under the registrant.
+* **Target Models:** `agriregistry.farm` and `agriregistry.crop` when the demo addon is installed, otherwise fallback to `res.partner`.
+* **Mapping:** Writes farm/land and crop activity details into proper AgriRegistry360 demo menus.
 
 ### Program Enrollment
-* **Target Model:** `g2p.program.membership`
+* **Target Model:** `agriregistry.enrollment` when the demo addon is installed, otherwise fallback to `res.partner`.
 * **Data Mapping:**
-  - `programCode` ➔ `program_id` (OpenG2P Welfare Program ID)
-  - `farmerCode` ➔ `partner_id` (Registrant Partner Reference)
-  - `enrollmentCode` ➔ `membership_ref` (Unique membership identifier)
-  - `enrollmentStatus` ➔ `state` (Status mapping)
+  - `programCode` ➔ `program_code`
+  - `programName` ➔ `program_name`
+  - `farmerCode` ➔ `farmer_code`
+  - `enrollmentCode` ➔ `enrollment_code`
+  - `enrollmentStatus` ➔ `enrollment_status`
+  - `approvalStatus` ➔ `approval_status`
 
 ### OpenG2P Fallback vs Real PBMS Model Mode
 
@@ -140,13 +148,15 @@ curl http://localhost:5001/api/platform-sync/openg2p/models
 
 Configured Docker model variables:
 ```env
-OPENG2P_REGISTRANT_MODEL=res.partner
+OPENG2P_REGISTRANT_MODEL=agriregistry.farmer
 OPENG2P_PROGRAM_MODEL=g2p.program
-OPENG2P_ENROLLMENT_MODEL=g2p.program.membership
-OPENG2P_FARM_MODEL=g2p.agriculture.farm
-OPENG2P_CROP_MODEL=g2p.agriculture.crop
-OPENG2P_ELIGIBILITY_MODEL=g2p.eligibility.check
+OPENG2P_ENROLLMENT_MODEL=agriregistry.enrollment
+OPENG2P_FARM_MODEL=agriregistry.farm
+OPENG2P_CROP_MODEL=agriregistry.crop
+OPENG2P_ELIGIBILITY_MODEL=agriregistry.eligibility
 OPENG2P_FALLBACK_MODEL=res.partner
+ODOO_FARMER_MODEL=agriregistry.farmer
+ODOO_RESERVATION_MODEL=agriregistry.inventory.reservation
 ```
 
 Fallback status meanings:
@@ -160,6 +170,34 @@ OpenG2P UI verification:
 2. Go to **Contacts**.
 3. Search for `Mohamed Ameen`, `FARM-LAND-0001`, `CROP-0001`, `ELIG`, or `ENROLL`.
 4. Open the matching records and review the `ref`, `name`, and internal notes/comments.
+
+### Installing the AgriRegistry360 Odoo Addon
+
+The repository includes a lightweight demo addon at `odoo-addons/agriregistry360_base`. Docker Compose mounts `./odoo-addons` into both Odoo containers at `/mnt/extra-addons`.
+
+Install in Odoo ERP:
+1. Open `http://localhost:8069`.
+2. Go to **Apps**.
+3. Click **Update Apps List**.
+4. Search `AgriRegistry360`.
+5. Activate **AgriRegistry360 Farm Registry**.
+
+Install in OpenG2P-compatible Odoo:
+1. Open `http://localhost:8070`.
+2. Go to **Apps**.
+3. Click **Update Apps List**.
+4. Search `AgriRegistry360`.
+5. Activate **AgriRegistry360 Farm Registry**.
+
+When installed, Platform Sync writes to:
+- `agriregistry.farmer`
+- `agriregistry.farm`
+- `agriregistry.crop`
+- `agriregistry.eligibility`
+- `agriregistry.enrollment`
+- `agriregistry.inventory.reservation`
+
+If the addon is not installed, fallback sync remains available through visible `res.partner` records.
 
 ---
 

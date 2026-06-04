@@ -51,6 +51,7 @@ services:
       - PASSWORD=odoo
     volumes:
       - odoo-data:/var/lib/odoo
+      - ./odoo-addons:/mnt/extra-addons
     networks:
       - agriregistry360-net
     healthcheck:
@@ -93,6 +94,7 @@ services:
       - PASSWORD=odoo
     volumes:
       - openg2p-data:/var/lib/odoo
+      - ./odoo-addons:/mnt/extra-addons
     networks:
       - agriregistry360-net
     healthcheck:
@@ -143,18 +145,20 @@ services:
       - ODOO_DB=agriregistry360
       - ODOO_USERNAME=admin@example.com
       - ODOO_PASSWORD=admin
+      - ODOO_FARMER_MODEL=agriregistry.farmer
+      - ODOO_RESERVATION_MODEL=agriregistry.inventory.reservation
 
       - OPENG2P_ENABLED=true
       - OPENG2P_URL=http://openg2p:8069
       - OPENG2P_DB=openg2p
       - OPENG2P_USERNAME=admin@example.com
       - OPENG2P_PASSWORD=admin
-      - OPENG2P_REGISTRANT_MODEL=res.partner
+      - OPENG2P_REGISTRANT_MODEL=agriregistry.farmer
       - OPENG2P_PROGRAM_MODEL=g2p.program
-      - OPENG2P_ENROLLMENT_MODEL=g2p.program.membership
-      - OPENG2P_FARM_MODEL=g2p.agriculture.farm
-      - OPENG2P_CROP_MODEL=g2p.agriculture.crop
-      - OPENG2P_ELIGIBILITY_MODEL=g2p.eligibility.check
+      - OPENG2P_ENROLLMENT_MODEL=agriregistry.enrollment
+      - OPENG2P_FARM_MODEL=agriregistry.farm
+      - OPENG2P_CROP_MODEL=agriregistry.crop
+      - OPENG2P_ELIGIBILITY_MODEL=agriregistry.eligibility
       - OPENG2P_FALLBACK_MODEL=res.partner
 
       - WSO2_ENABLED=true

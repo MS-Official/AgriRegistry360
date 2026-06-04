@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_agriregistry_farmer,agriregistry.farmer,model_agriregistry_farmer,base.group_user,1,1,1,1
+access_agriregistry_farm,agriregistry.farm,model_agriregistry_farm,base.group_user,1,1,1,1
+access_agriregistry_crop,agriregistry.crop,model_agriregistry_crop,base.group_user,1,1,1,1
+access_agriregistry_eligibility,agriregistry.eligibility,model_agriregistry_eligibility,base.group_user,1,1,1,1
+access_agriregistry_enrollment,agriregistry.enrollment,model_agriregistry_enrollment,base.group_user,1,1,1,1
+access_agriregistry_inventory_reservation,agriregistry.inventory.reservation,model_agriregistry_inventory_reservation,base.group_user,1,1,1,1

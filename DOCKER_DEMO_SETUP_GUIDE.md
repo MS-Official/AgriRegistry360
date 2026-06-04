@@ -76,7 +76,31 @@ After changing Docker credentials or environment values, recreate the backend co
 docker compose up -d --force-recreate backend
 ```
 
-### 3.3 View Logs
+### 3.3 Install AgriRegistry360 Odoo Addon
+
+The Docker stack mounts `./odoo-addons` into both Odoo containers at `/mnt/extra-addons`. Install the lightweight demo addon so AgriRegistry360 records appear as proper Odoo menus/models instead of only fallback Contacts.
+
+Install in Odoo ERP:
+1. Open `http://localhost:8069`.
+2. Go to **Apps**.
+3. Click **Update Apps List**.
+4. Search `AgriRegistry360`.
+5. Activate **AgriRegistry360 Farm Registry**.
+
+Install in OpenG2P-compatible Odoo:
+1. Open `http://localhost:8070`.
+2. Go to **Apps**.
+3. Click **Update Apps List**.
+4. Search `AgriRegistry360`.
+5. Activate **AgriRegistry360 Farm Registry**.
+
+After installing the addon, rerun:
+```bash
+docker compose up -d --force-recreate backend
+curl -X POST http://localhost:5001/api/platform-sync/full-demo
+```
+
+### 3.4 View Logs
 To inspect logs across all containers:
 ```bash
 npm run docker:logs
@@ -86,7 +110,7 @@ To check logs for a specific service (e.g. backend):
 docker compose logs -f backend
 ```
 
-### 3.4 Stop/Teardown Everything
+### 3.5 Stop/Teardown Everything
 To stop all containers:
 ```bash
 npm run docker:down
