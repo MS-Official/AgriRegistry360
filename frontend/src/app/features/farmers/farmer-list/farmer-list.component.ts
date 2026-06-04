@@ -74,10 +74,16 @@ import {
               </td>
               <td>{{ farmer.registeredBy }}</td>
               <td>
-                <div class="actions">
-                  <a class="button secondary" [routerLink]="['/farmers', farmer._id]">View</a>
-                  <button class="button secondary" type="button" (click)="setStatus(farmer, 'VERIFIED')">Verify</button>
-                  <button class="button danger" type="button" (click)="setStatus(farmer, 'REJECTED')">Reject</button>
+                <div class="action-buttons">
+                  <a class="icon-btn icon-btn-neutral" [routerLink]="['/farmers', farmer._id]" title="View farmer" aria-label="View farmer">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                  </a>
+                  <button class="icon-btn icon-btn-success" type="button" (click)="setStatus(farmer, 'VERIFIED')" title="Verify farmer" aria-label="Verify farmer">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+                  </button>
+                  <button class="icon-btn icon-btn-danger" type="button" (click)="setStatus(farmer, 'REJECTED')" title="Reject farmer" aria-label="Reject farmer">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
+                  </button>
                 </div>
               </td>
             </tr>
@@ -148,4 +154,3 @@ export class FarmerListComponent implements OnInit {
     });
   }
 }
-

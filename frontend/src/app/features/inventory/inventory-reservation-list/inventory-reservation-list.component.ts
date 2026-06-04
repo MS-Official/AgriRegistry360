@@ -76,10 +76,16 @@ import { InventoryService } from '../inventory.service';
               <td>{{ reservation.reservedBy }}</td>
               <td>{{ reservation.reservedAt | date: 'medium' }}</td>
               <td>
-                <div class="actions">
-                  <a class="button secondary" [routerLink]="['/inventory/reservations', reservation._id]">View</a>
-                  <button class="button secondary" type="button" (click)="issue(reservation)">Issue</button>
-                  <button class="button danger" type="button" (click)="cancel(reservation)">Cancel</button>
+                <div class="action-buttons">
+                  <a class="icon-btn icon-btn-neutral" [routerLink]="['/inventory/reservations', reservation._id]" title="View reservation" aria-label="View reservation">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                  </a>
+                  <button class="icon-btn icon-btn-info" type="button" (click)="issue(reservation)" title="Issue reservation" aria-label="Issue reservation">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+                  </button>
+                  <button class="icon-btn icon-btn-warning" type="button" (click)="cancel(reservation)" title="Cancel reservation" aria-label="Cancel reservation">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 14.14 14.14"/></svg>
+                  </button>
                 </div>
               </td>
             </tr>
@@ -161,4 +167,3 @@ export class InventoryReservationListComponent implements OnInit {
     });
   }
 }
-

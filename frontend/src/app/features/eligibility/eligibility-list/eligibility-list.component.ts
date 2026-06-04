@@ -74,7 +74,11 @@ import { EligibilityService } from '../eligibility.service';
               <td>{{ eligibility.checkedBy }}</td>
               <td>{{ eligibility.checkedAt | date: 'medium' }}</td>
               <td>
-                <a class="button secondary" [routerLink]="['/eligibility', eligibility._id]">View</a>
+                <div class="action-buttons">
+                  <a class="icon-btn icon-btn-neutral" [routerLink]="['/eligibility', eligibility._id]" title="View eligibility check" aria-label="View eligibility check">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                  </a>
+                </div>
               </td>
             </tr>
             <tr *ngIf="!isLoading && eligibilityChecks.length === 0">
@@ -127,4 +131,3 @@ export class EligibilityListComponent implements OnInit {
     this.loadEligibilityChecks();
   }
 }
-

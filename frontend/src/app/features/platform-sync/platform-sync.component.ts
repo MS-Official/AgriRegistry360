@@ -273,8 +273,15 @@ interface DemoReadiness {
                 <span class="badge" [class.verified]="step.syncStatus === 'SYNCED' || step.syncStatus === 'FALLBACK_SYNCED'" [class.pending]="step.syncStatus === 'DEMO_MODE'" [class.rejected]="step.syncStatus === 'FAILED'" [class.disabled]="step.syncStatus === 'DISABLED'">
                   {{ step.syncStatus }}
                 </span>
-                <button *ngIf="step.requestPayload || step.responsePayload" class="button secondary" style="min-height: 28px; padding: 2px 8px; font-size: 12px;" (click)="toggleStepPayload(idx)">
-                  {{ expandedStepIdx === idx ? 'Hide Payload' : 'View Payload' }}
+                <button
+                  *ngIf="step.requestPayload || step.responsePayload"
+                  class="icon-btn icon-btn-info"
+                  type="button"
+                  [title]="expandedStepIdx === idx ? 'Hide payload' : 'View payload'"
+                  [attr.aria-label]="expandedStepIdx === idx ? 'Hide payload' : 'View payload'"
+                  (click)="toggleStepPayload(idx)"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="m10 13-2 2 2 2"/><path d="m14 17 2-2-2-2"/></svg>
                 </button>
               </div>
             </div>
@@ -578,8 +585,14 @@ interface DemoReadiness {
                   <span *ngIf="!log.errorMessage" style="color: var(--muted);">—</span>
                 </td>
                 <td>
-                  <button class="button secondary" style="min-height: 28px; padding: 2px 8px; font-size: 12px;" (click)="togglePayload(log._id)">
-                    {{ expandedLogId === log._id ? 'Hide JSON' : 'View JSON' }}
+                  <button
+                    class="icon-btn icon-btn-info"
+                    type="button"
+                    [title]="expandedLogId === log._id ? 'Hide JSON payload' : 'View JSON payload'"
+                    [attr.aria-label]="expandedLogId === log._id ? 'Hide JSON payload' : 'View JSON payload'"
+                    (click)="togglePayload(log._id)"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="m10 13-2 2 2 2"/><path d="m14 17 2-2-2-2"/></svg>
                   </button>
                 </td>
               </tr>
