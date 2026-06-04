@@ -4,6 +4,7 @@ import { config } from './config/env.js';
 import { seedDemoCrop } from './seed/demoCrop.seed.js';
 import { seedDemoFarm } from './seed/demoFarm.seed.js';
 import { seedDemoFarmer } from './seed/demoFarmer.seed.js';
+import { seedDemoInventory } from './seed/demoInventory.seed.js';
 
 async function startServer() {
   await connectDb(config.mongodbUri);
@@ -19,6 +20,8 @@ async function startServer() {
   if (config.seedDemoCrop) {
     await seedDemoCrop();
   }
+
+  await seedDemoInventory();
 
   const app = createApp();
   app.listen(config.port, () => {

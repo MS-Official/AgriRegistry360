@@ -8,6 +8,10 @@ import { EligibilityListComponent } from './features/eligibility/eligibility-lis
 import { EnrollmentCreateComponent } from './features/enrollments/enrollment-create/enrollment-create.component';
 import { EnrollmentDetailsComponent } from './features/enrollments/enrollment-details/enrollment-details.component';
 import { EnrollmentListComponent } from './features/enrollments/enrollment-list/enrollment-list.component';
+import { InventoryItemsComponent } from './features/inventory/inventory-items/inventory-items.component';
+import { InventoryReservationDetailsComponent } from './features/inventory/inventory-reservation-details/inventory-reservation-details.component';
+import { InventoryReservationListComponent } from './features/inventory/inventory-reservation-list/inventory-reservation-list.component';
+import { InventoryReserveComponent } from './features/inventory/inventory-reserve/inventory-reserve.component';
 import { FarmerDetailsComponent } from './features/farmers/farmer-details/farmer-details.component';
 import { FarmerListComponent } from './features/farmers/farmer-list/farmer-list.component';
 import { FarmerRegistrationComponent } from './features/farmers/farmer-registration/farmer-registration.component';
@@ -32,4 +36,8 @@ export const routes: Routes = [
   { path: 'enrollments', component: EnrollmentListComponent },
   { path: 'enrollments/create', component: EnrollmentCreateComponent },
   { path: 'enrollments/:id', component: EnrollmentDetailsComponent },
+  { path: 'inventory/items', component: InventoryItemsComponent },
+  { path: 'inventory/reserve', component: InventoryReserveComponent },
+  { path: 'inventory/reservations', component: InventoryReservationListComponent },
+  { path: 'inventory/reservations/:id', component: InventoryReservationDetailsComponent },
 ];

@@ -4,6 +4,7 @@ import {
 } from '../controllers/crop.controller.js';
 import { getEligibilityByFarmId } from '../controllers/eligibility.controller.js';
 import { getEnrollmentsByFarmId } from '../controllers/enrollment.controller.js';
+import { getReservationsByFarmId } from '../controllers/inventory.controller.js';
 import {
   getFarmById,
   getFarms,
@@ -19,6 +20,7 @@ farmRouter.get('/', getFarms);
 farmRouter.get('/:farmId/crops', getCropsByFarmId);
 farmRouter.get('/:farmId/eligibility', getEligibilityByFarmId);
 farmRouter.get('/:farmId/enrollments', getEnrollmentsByFarmId);
+farmRouter.get('/:farmId/reservations', getReservationsByFarmId);
 farmRouter.get('/:id', getFarmById);
 farmRouter.put('/:id', updateFarm);
 farmRouter.patch('/:id/verify', verifyFarm);

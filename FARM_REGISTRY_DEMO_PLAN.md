@@ -79,7 +79,17 @@ WSO2 API Manager Exposure
 | GET | `/api/eligibility/:eligibilityId/enrollments` | Implemented in Program Enrollment scope |
 | PATCH | `/api/enrollments/:id/approval` | Implemented in Program Enrollment scope |
 | PATCH | `/api/enrollments/:id/cancel` | Implemented in Program Enrollment scope |
-| POST | `/api/odoo/inventory/reserve` | Future integration |
+| GET | `/api/odoo/inventory/items` | Implemented in Odoo Inventory Reservation scope |
+| GET | `/api/odoo/inventory/items/:id` | Implemented in Odoo Inventory Reservation scope |
+| POST | `/api/odoo/inventory/reserve` | Implemented in Odoo Inventory Reservation scope |
+| GET | `/api/odoo/inventory/reservations` | Implemented in Odoo Inventory Reservation scope |
+| GET | `/api/odoo/inventory/reservations/:id` | Implemented in Odoo Inventory Reservation scope |
+| GET | `/api/enrollments/:enrollmentId/reservations` | Implemented in Odoo Inventory Reservation scope |
+| GET | `/api/farmers/:farmerId/reservations` | Implemented in Odoo Inventory Reservation scope |
+| GET | `/api/farms/:farmId/reservations` | Implemented in Odoo Inventory Reservation scope |
+| GET | `/api/crops/:cropId/reservations` | Implemented in Odoo Inventory Reservation scope |
+| PATCH | `/api/odoo/inventory/reservations/:id/cancel` | Implemented in Odoo Inventory Reservation scope |
+| PATCH | `/api/odoo/inventory/reservations/:id/issue` | Implemented in Odoo Inventory Reservation scope |
 | GET | `/api/reports/farm-registry-summary` | Future module |
 
 ## Platform Responsibilities
@@ -136,7 +146,7 @@ WSO2 API Manager Exposure
 - Eligibility check form, list, and details screens
 - Eligibility summaries on Farmer, Farm, and Crop details
 
-### Program Enrollment: Current Module / In Progress
+### Program Enrollment: Completed
 
 - Enrollment creation from eligible eligibility checks
 - Duplicate active enrollment prevention
@@ -146,8 +156,18 @@ WSO2 API Manager Exposure
 - Enrollment cancellation
 - Linked enrollments shown on Eligibility Details
 
+### Odoo Inventory Reservation: Current Module / In Progress
+
+- Demo fertilizer inventory item seed
+- Inventory item list
+- Inventory reservation from approved enrollments
+- Entitlement to fertilizer stock mapping
+- Duplicate active reservation prevention
+- Reservation issue and cancel workflows
+- Reservation stock accounting
+- Linked reservations shown on Enrollment Details
+
 ## Future Modules
 
-- Odoo Inventory Reservation / Distribution
 - WSO2 API Publishing
 - Reports

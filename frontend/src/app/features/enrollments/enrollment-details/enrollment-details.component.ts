@@ -1,6 +1,9 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { reservationStatusClass, reservationStatusLabel } from '../../inventory/inventory-labels';
+import { InventoryReservation } from '../../inventory/inventory.model';
+import { InventoryService } from '../../inventory/inventory.service';
 import {
   approvalStatusClass,
   approvalStatusLabel,
@@ -99,6 +102,50 @@ import { EnrollmentService } from '../enrollment.service';
         </div>
       </div>
 
+      <section style="margin-top: 22px;">
+        <div class="page-title" style="margin-bottom: 12px;">
+          <div>
+            <h1 style="font-size: 20px;">Inventory Reservations</h1>
+            <p>Simulated Odoo reservations created for this enrollment.</p>
+          </div>
+          <a class="button secondary" routerLink="/inventory/reserve">Reserve Inventory</a>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Reservation Code</th>
+                <th>Item Name</th>
+                <th>Reserved Quantity</th>
+                <th>Reservation Status</th>
+                <th>Warehouse Name</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let reservation of linkedReservations">
+                <td>
+                  <a [routerLink]="['/inventory/reservations', reservation._id]">
+                    {{ reservation.reservationCode }}
+                  </a>
+                </td>
+                <td>{{ reservation.itemName }}</td>
+                <td>{{ reservation.reservedQuantity }} {{ reservation.unit }}</td>
+                <td>
+                  <span class="badge" [ngClass]="reservationStatusClass(reservation.reservationStatus)">
+                    {{ reservationStatusLabel(reservation.reservationStatus) }}
+                  </span>
+                </td>
+                <td>{{ reservation.warehouseName }}</td>
+              </tr>
+              <tr *ngIf="linkedReservations.length === 0">
+                <td colspan="5">No inventory reservation created yet.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
       <div class="grid placeholder-grid">
         <div class="placeholder">
           <strong>Odoo Reservation</strong>
@@ -122,16 +169,20 @@ import { EnrollmentService } from '../enrollment.service';
 })
 export class EnrollmentDetailsComponent implements OnInit {
   enrollment?: Enrollment;
+  linkedReservations: InventoryReservation[] = [];
   errorMessage = '';
 
   readonly enrollmentStatusLabel = enrollmentStatusLabel;
   readonly enrollmentStatusClass = enrollmentStatusClass;
   readonly approvalStatusLabel = approvalStatusLabel;
   readonly approvalStatusClass = approvalStatusClass;
+  readonly reservationStatusLabel = reservationStatusLabel;
+  readonly reservationStatusClass = reservationStatusClass;
 
   constructor(
     private readonly route: ActivatedRoute,
-    private readonly enrollmentService: EnrollmentService
+    private readonly enrollmentService: EnrollmentService,
+    private readonly inventoryService: InventoryService
   ) {}
 
   ngOnInit(): void {
@@ -145,11 +196,22 @@ export class EnrollmentDetailsComponent implements OnInit {
     this.enrollmentService.getEnrollmentById(id).subscribe({
       next: (enrollment) => {
         this.enrollment = enrollment;
+        this.loadLinkedReservations(enrollment._id);
       },
       error: (error) => {
         this.errorMessage = error.error?.message || 'Unable to load enrollment details.';
       },
     });
   }
-}
 
+  private loadLinkedReservations(enrollmentId: string): void {
+    this.inventoryService.getReservationsByEnrollmentId(enrollmentId).subscribe({
+      next: (reservations) => {
+        this.linkedReservations = reservations;
+      },
+      error: (error) => {
+        this.errorMessage = error.error?.message || 'Unable to load inventory reservations.';
+      },
+    });
+  }
+}
