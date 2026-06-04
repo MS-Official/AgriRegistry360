@@ -16,6 +16,67 @@ const errorResponse = {
   },
 };
 
+const pathParamDescriptions = {
+  id: 'MongoDB resource ID',
+  farmerId: 'Farmer ID',
+  farmId: 'Farm/Land ID',
+  cropId: 'Crop ID',
+  eligibilityId: 'Eligibility ID',
+  enrollmentId: 'Enrollment ID',
+  reservationId: 'Inventory reservation ID',
+};
+
+function pathParameter(name) {
+  return {
+    name,
+    in: 'path',
+    required: true,
+    schema: { type: 'string' },
+    description: pathParamDescriptions[name] || 'Path parameter',
+  };
+}
+
+function extractPathParameterNames(path) {
+  return [...path.matchAll(/{([^}]+)}/g)].map((match) => match[1]);
+}
+
+function withPathParameters(spec) {
+  Object.entries(spec.paths).forEach(([path, pathItem]) => {
+    const parameterNames = extractPathParameterNames(path);
+    if (parameterNames.length === 0) {
+      return;
+    }
+
+    const existing = pathItem.parameters || [];
+    const existingNames = new Set(
+      existing
+        .filter((parameter) => parameter.in === 'path')
+        .map((parameter) => parameter.name)
+    );
+
+    pathItem.parameters = [
+      ...existing,
+      ...parameterNames
+        .filter((name) => !existingNames.has(name))
+        .map((name) => pathParameter(name)),
+    ];
+  });
+
+  return spec;
+}
+
+export function createWso2OpenApiSpec() {
+  return {
+    ...openApiSpec,
+    info: {
+      ...openApiSpec.info,
+      title: 'AgriRegistry360 Farm Registry API',
+      version: '1.0.0',
+    },
+    servers: [{ url: 'http://localhost:5001', description: 'Host backend URL for WSO2 OpenAPI file import' }],
+  };
+}
+
 function listOperation(tag, summary, description = summary) {
   return {
     tags: [tag],
@@ -68,7 +129,7 @@ function patchOperation(tag, summary, schemaName) {
   };
 }
 
-export const openApiSpec = {
+export const openApiSpec = withPathParameters({
   openapi: '3.0.3',
   info: {
     title: 'AgriRegistry360 Farm Registry API',
@@ -325,12 +386,13 @@ export const openApiSpec = {
   },
   components: {
     parameters: {
-      id: { name: 'id', in: 'path', required: true, schema: { type: 'string' } },
-      farmerId: { name: 'farmerId', in: 'path', required: true, schema: { type: 'string' } },
-      farmId: { name: 'farmId', in: 'path', required: true, schema: { type: 'string' } },
-      cropId: { name: 'cropId', in: 'path', required: true, schema: { type: 'string' } },
-      eligibilityId: { name: 'eligibilityId', in: 'path', required: true, schema: { type: 'string' } },
-      enrollmentId: { name: 'enrollmentId', in: 'path', required: true, schema: { type: 'string' } },
+      id: pathParameter('id'),
+      farmerId: pathParameter('farmerId'),
+      farmId: pathParameter('farmId'),
+      cropId: pathParameter('cropId'),
+      eligibilityId: pathParameter('eligibilityId'),
+      enrollmentId: pathParameter('enrollmentId'),
+      reservationId: pathParameter('reservationId'),
       SearchQuery: { name: 'search', in: 'query', required: false, schema: { type: 'string' } },
     },
     schemas: {
@@ -417,4 +479,4 @@ export const openApiSpec = {
       },
     },
   },
-};
+});

@@ -210,11 +210,13 @@ AgriRegistry360 provides built-in metadata catalog configuration so WSO2 API Man
 3. **Inventory API:** Serves Odoo-style Inventory Reservations and Fulfilment (`/agriregistry360/inventory`).
 
 ### How to Publish to WSO2
-1. Download the OpenAPI spec from `http://localhost:5001/api/docs.json`.
+1. Download the WSO2-ready OpenAPI spec from `http://localhost:5001/api/docs/wso2.json` or the standard spec from `http://localhost:5001/api/docs.json`.
 2. Open the WSO2 API Publisher Portal at `https://localhost:9443/publisher`.
 3. Choose **Create API ➔ Import OpenAPI Definition**.
-4. Upload `docs.json`, select the target context (e.g. `/agriregistry360/registry`), and set endpoint target to `http://localhost:5001/api`.
-5. Deploy and publish! Once published, mark the API status as published on the Platform Sync Center page.
+4. Prefer OpenAPI File/Archive upload and upload the saved JSON file.
+5. Select the target context (e.g. `/agriregistry360/registry`) and set endpoint target to `http://localhost:5001/api`.
+6. If WSO2 URL import fails, use file upload. WSO2 running inside Docker may not resolve host-browser `localhost` URLs correctly.
+7. Deploy and publish. Once published, mark the API status as published on the Platform Sync Center page.
 
 ---
 

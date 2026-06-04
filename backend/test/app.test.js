@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import request from 'supertest';
 import { createApp } from '../src/app.js';
+import { validateOpenApiPathParameters } from '../scripts/validate-openapi.js';
 
 const app = createApp();
 
@@ -51,6 +52,26 @@ describe('App configuration', () => {
     assert.ok(response.body.paths['/api/farmers/register']);
     assert.ok(response.body.paths['/api/odoo/inventory/reservations']);
     assert.ok(response.body.paths['/api/openg2p/mapping']);
+  });
+
+  it('declares every OpenAPI path variable as a path parameter', async () => {
+    const response = await request(app).get('/api/docs.json').expect(200);
+    const errors = validateOpenApiPathParameters(response.body);
+
+    assert.deepEqual(errors, []);
+    assert.equal(response.body.paths['/api/farmers/{id}'].parameters[0].name, 'id');
+    assert.equal(response.body.paths['/api/platform-sync/reservations/{reservationId}/odoo'].parameters[0].name, 'reservationId');
+  });
+
+  it('returns WSO2-ready OpenAPI JSON spec', async () => {
+    const response = await request(app).get('/api/docs/wso2.json').expect(200);
+    const errors = validateOpenApiPathParameters(response.body);
+
+    assert.deepEqual(errors, []);
+    assert.equal(response.body.openapi, '3.0.3');
+    assert.equal(response.body.info.title, 'AgriRegistry360 Farm Registry API');
+    assert.equal(response.body.info.version, '1.0.0');
+    assert.ok(response.body.paths['/api/farmers/{id}']);
   });
 
   it('registers Swagger UI docs route', async () => {

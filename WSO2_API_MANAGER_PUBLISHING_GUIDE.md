@@ -101,11 +101,14 @@ Metadata:
 ## Import OpenAPI Spec Into WSO2
 
 1. Start the AgriRegistry360 backend.
-2. Open `http://localhost:5001/api/docs.json`.
-3. In WSO2 API Publisher, create a REST API using OpenAPI import.
-4. Upload the JSON spec or provide the URL if WSO2 can reach the backend.
-5. Split or filter resources into Registry, Program, and Inventory APIs as needed.
-6. Set context, version, security, and throttling from the metadata above.
+2. Open `http://localhost:5001/api/docs/wso2.json` or `http://localhost:5001/api/docs.json`.
+3. Save the JSON file locally.
+4. In WSO2 API Publisher, create a REST API using OpenAPI import.
+5. Use OpenAPI File/Archive upload and upload the saved JSON file.
+6. Use URL import only if WSO2 can reach the backend from inside Docker.
+7. If URL import fails, use file upload. WSO2 running inside Docker may not resolve host-browser `localhost` URLs correctly.
+8. Split or filter resources into Registry, Program, and Inventory APIs as needed.
+9. Set context, version, security, and throttling from the metadata above.
 
 ## Demo Talking Points
 
@@ -121,4 +124,3 @@ Metadata:
 - Subscription plans.
 - API analytics.
 - Gateway deployment.
-

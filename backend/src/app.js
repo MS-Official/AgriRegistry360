@@ -3,7 +3,7 @@ import express from 'express';
 import swaggerUi from 'swagger-ui-express';
 import { config } from './config/env.js';
 import { apiCatalog } from './docs/apiCatalog.js';
-import { openApiSpec } from './docs/openapi.js';
+import { createWso2OpenApiSpec, openApiSpec } from './docs/openapi.js';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
 import { cropRouter } from './routes/crop.routes.js';
 import { dashboardRouter } from './routes/dashboard.routes.js';
@@ -29,11 +29,15 @@ export function createApp() {
   app.options('*', cors(corsOptions));
   app.use(express.json());
 
-  app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(openApiSpec));
-
   app.get('/api/docs.json', (req, res) => {
     res.json(openApiSpec);
   });
+
+  app.get('/api/docs/wso2.json', (req, res) => {
+    res.json(createWso2OpenApiSpec());
+  });
+
+  app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(openApiSpec));
 
   app.get('/api/catalog', (req, res) => {
     res.json({

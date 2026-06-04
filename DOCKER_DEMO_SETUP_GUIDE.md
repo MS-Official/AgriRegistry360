@@ -146,6 +146,17 @@ curl -X POST http://localhost:5001/api/platform-sync/full-demo
 curl http://localhost:5001/api/platform-sync/logs
 ```
 
+### WSO2 OpenAPI Import
+
+Preferred import method:
+1. Open `http://localhost:5001/api/docs/wso2.json` or `http://localhost:5001/api/docs.json` in your browser.
+2. Save the JSON file locally.
+3. Open WSO2 Publisher at `https://localhost:9443/publisher`.
+4. Choose OpenAPI File/Archive upload.
+5. Upload the saved JSON file and continue API creation.
+
+WSO2 running inside Docker may not resolve browser `localhost` URLs the same way your host browser does. If URL import fails, use file upload.
+
 ### OpenG2P Fallback vs Real PBMS Model Mode
 
 The Docker OpenG2P service is an OpenG2P-compatible Odoo instance. If official PBMS/agriculture models are installed, AgriRegistry360 writes to those configured models. If they are not installed, AgriRegistry360 writes visible fallback records into OpenG2P/Odoo Contacts using `res.partner`.
