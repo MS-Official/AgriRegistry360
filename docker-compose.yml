@@ -1,0 +1,203 @@
+version: "3.8"
+
+services:
+  # MongoDB service
+  mongo:
+    image: mongo:6.0
+    container_name: agriregistry360-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - agriregistry360-net
+    healthcheck:
+      test: [ "CMD-SHELL", "mongosh --eval 'db.adminCommand(\"ping\")' || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # PostgreSQL database for Odoo ERP
+  odoo-db:
+    image: postgres:15
+    container_name: agriregistry360-odoo-db
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=odoo
+      - POSTGRES_PASSWORD=odoo
+    volumes:
+      - odoo-db-data:/var/lib/postgresql/data
+    networks:
+      - agriregistry360-net
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U odoo" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # Odoo ERP instance
+  odoo:
+    image: odoo:17
+    container_name: agriregistry360-odoo
+    depends_on:
+      odoo-db:
+        condition: service_healthy
+    ports:
+      - "8069:8069"
+    environment:
+      - HOST=odoo-db
+      - USER=odoo
+      - PASSWORD=odoo
+    volumes:
+      - odoo-data:/var/lib/odoo
+    networks:
+      - agriregistry360-net
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8069/web/login" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  # PostgreSQL database for OpenG2P
+  openg2p-db:
+    image: postgres:15
+    container_name: agriregistry360-openg2p-db
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=odoo
+      - POSTGRES_PASSWORD=odoo
+    volumes:
+      - openg2p-db-data:/var/lib/postgresql/data
+    networks:
+      - agriregistry360-net
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U odoo" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # OpenG2P placeholder instance (runs standard Odoo 17 mapped to port 8070)
+  openg2p:
+    image: odoo:17
+    container_name: agriregistry360-openg2p
+    depends_on:
+      openg2p-db:
+        condition: service_healthy
+    ports:
+      - "8070:8069"
+    environment:
+      - HOST=openg2p-db
+      - USER=odoo
+      - PASSWORD=odoo
+    volumes:
+      - openg2p-data:/var/lib/odoo
+    networks:
+      - agriregistry360-net
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8069/web/login" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  # WSO2 API Manager service
+  # NOTE: WSO2 APIM requires significant resources (Min 4GB RAM allocated to Docker).
+  wso2-apim:
+    image: wso2/wso2am:4.3.0
+    container_name: agriregistry360-wso2-apim
+    ports:
+      - "9443:9443"
+      - "8243:8243"
+      - "8280:8280"
+    volumes:
+      - wso2-data:/home/wso2carbon
+    networks:
+      - agriregistry360-net
+    healthcheck:
+      test: [ "CMD-SHELL", "nc -z localhost 9443 || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # AgriRegistry360 Express Backend
+  backend:
+    build: ./backend
+    container_name: agriregistry360-backend
+    depends_on:
+      mongo:
+        condition: service_healthy
+    ports:
+      - "5001:5001"
+    environment:
+      - PORT=5001
+      - NODE_ENV=development
+      - MONGO_URI=mongodb://mongo:27017/agriregistry360
+      - JWT_SECRET=change_this_secret
+      - JWT_EXPIRES_IN=1d
+
+      - ODOO_ENABLED=true
+      - ODOO_URL=http://odoo:8069
+      - ODOO_DB=agriregistry360
+      - ODOO_USERNAME=admin
+      - ODOO_PASSWORD=admin
+
+      - OPENG2P_ENABLED=true
+      - OPENG2P_URL=http://openg2p:8069
+      - OPENG2P_DB=openg2p
+      - OPENG2P_USERNAME=admin
+      - OPENG2P_PASSWORD=admin
+      - OPENG2P_REGISTRANT_MODEL=res.partner
+      - OPENG2P_PROGRAM_MODEL=g2p.program
+      - OPENG2P_ENROLLMENT_MODEL=g2p.program.membership
+
+      - WSO2_ENABLED=true
+      - WSO2_APIM_BASE_URL=https://wso2-apim:9443
+      - WSO2_GATEWAY_BASE_URL=https://wso2-apim:8243
+      - WSO2_USERNAME=admin
+      - WSO2_PASSWORD=admin
+      - WSO2_REGISTRY_API_CONTEXT=/agriregistry360/registry
+      - WSO2_PROGRAM_API_CONTEXT=/agriregistry360/program
+      - WSO2_INVENTORY_API_CONTEXT=/agriregistry360/inventory
+    networks:
+      - agriregistry360-net
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:5001/api/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # AgriRegistry360 Angular Frontend
+  frontend:
+    build: ./frontend
+    container_name: agriregistry360-frontend
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "4200:4200"
+    environment:
+      - API_BASE_URL=http://localhost:5001/api
+    networks:
+      - agriregistry360-net
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:4200" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  mongo-data:
+  odoo-db-data:
+  odoo-data:
+  openg2p-db-data:
+  openg2p-data:
+  wso2-data:
+
+networks:
+  agriregistry360-net:
+    driver: bridge

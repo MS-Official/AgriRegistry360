@@ -100,3 +100,19 @@ WSO2 API Manager manages secure proxy access, subscription tiers, and rate limit
 5. **Route Frontend Traffic through WSO2 Gateway:**
    - Create `frontend/src/environments/environment.wso2.ts` copying variables from `environment.wso2.example.ts`.
    - Update your Angular configuration to build with this environment file, causing all registry and program REST calls to go through the gateway port `8243`.
+
+---
+
+## 5. Running All Platforms with Docker Compose
+
+If you prefer a fully automated local environment where MongoDB, Odoo, OpenG2P, and WSO2 are pre-configured in containers, you can use Docker Compose.
+
+Refer to [DOCKER_DEMO_SETUP_GUIDE.md](file:///Users/shurafa28/Desktop/FarmRegistry/DOCKER_DEMO_SETUP_GUIDE.md) for full instructions.
+
+### Port Mappings and DNS Configuration
+- **Odoo ERP**: Mapped to host port `8069`. Internal service name is `odoo`.
+- **OpenG2P**: Mapped to host port `8070` to avoid conflicts on port `8069`. Internal service name is `openg2p`.
+- **WSO2 API Manager**: Mapped to host port `9443` (Publisher/DevPortal) and `8243` (Gateway). Internal service name is `wso2-apim`.
+
+### Backend Configuration
+Ensure you copy `.env.docker.example` to `.env` if you want to run the backend natively while talking to Docker containers, or let the Docker Compose environment inject it automatically during `docker compose up`.

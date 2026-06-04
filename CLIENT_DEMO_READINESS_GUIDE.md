@@ -173,3 +173,20 @@ WSO2 API Manager is the target API governance layer. In the demo, Swagger, OpenA
       Frontend UI (Angular) → WSO2 API Manager (Gateway) → AgriRegistry360 Backend (Express) → OpenG2P / Odoo ERP
       ```
 
+---
+
+## Running All Platforms with Docker Compose
+
+To demonstrate the full stack within a containerized environment (Backend, Frontend, MongoDB, Odoo, OpenG2P, and WSO2 API Manager), refer to [DOCKER_DEMO_SETUP_GUIDE.md](file:///Users/shurafa28/Desktop/FarmRegistry/DOCKER_DEMO_SETUP_GUIDE.md).
+
+- **Docker Container Networking**: The backend container resolves platform hosts via internal network addresses:
+  - `odoo` instead of `localhost`
+  - `openg2p` instead of `localhost`
+  - `wso2-apim` instead of `localhost`
+- **Host Endpoint Access**: Access UI pages and Swagger APIs using host-bound localhost ports:
+  - Frontend: `http://localhost:4200`
+  - Backend API / Swagger: `http://localhost:5001`
+  - Odoo ERP: `http://localhost:8069`
+  - OpenG2P placeholder: `http://localhost:8070`
+  - WSO2 Publisher: `https://localhost:9443/publisher`
+

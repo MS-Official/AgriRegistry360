@@ -181,3 +181,19 @@ When presenting this integration to the client, use the following interactive sc
 - **What to say:**
   > "If we log in to Odoo, we can see that Mohamed Ameen has been automatically registered as a contact, and the inventory reservation is logged and ready for dispatch. All of these platforms now work together seamlessly."
 
+---
+
+## Running All Platforms with Docker Compose
+
+To run the entire suite (AgriRegistry360 Backend, Frontend, MongoDB, Odoo, OpenG2P, and WSO2) in containerized mode, follow the instructions in [DOCKER_DEMO_SETUP_GUIDE.md](file:///Users/shurafa28/Desktop/FarmRegistry/DOCKER_DEMO_SETUP_GUIDE.md).
+
+### Environment Configuration Difference
+- **Local (Non-Docker) Environment**: Configured via `.env` pointing to local ports (`localhost:8069`, `localhost:8243`, etc.).
+- **Docker Compose Environment**: Configured via `.env.docker.example` / environment variables in `docker-compose.yml` resolving through internal container DNS names:
+  - `ODOO_URL=http://odoo:8069`
+  - `OPENG2P_URL=http://openg2p:8069`
+  - `WSO2_APIM_BASE_URL=https://wso2-apim:9443`
+  - `WSO2_GATEWAY_BASE_URL=https://wso2-apim:8243`
+  
+*Note: In Docker Compose mode, browser URLs remain host-facing (e.g., Odoo UI is accessible at `http://localhost:8069` and OpenG2P UI is mapped to `http://localhost:8070` on the host machine).*
+

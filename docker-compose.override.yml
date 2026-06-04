@@ -1,0 +1,13 @@
+version: "3.8"
+
+services:
+  # Map local source into containers to allow live reload
+  backend:
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+
+  frontend:
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules

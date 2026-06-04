@@ -1,3 +1,4 @@
+import './setupEnv.js';
 import assert from 'node:assert/strict';
 import { after, before, beforeEach, describe, it } from 'node:test';
 import mongoose from 'mongoose';
