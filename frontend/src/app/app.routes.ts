@@ -21,6 +21,7 @@ import { FarmerRegistrationComponent } from './features/farmers/farmer-registrat
 import { FarmDetailsComponent } from './features/farms/farm-details/farm-details.component';
 import { FarmListComponent } from './features/farms/farm-list/farm-list.component';
 import { FarmRegistrationComponent } from './features/farms/farm-registration/farm-registration.component';
+import { PlatformSyncComponent } from './features/platform-sync/platform-sync.component';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
@@ -46,4 +47,5 @@ export const routes: Routes = [
   { path: 'inventory/reservations/:id', component: InventoryReservationDetailsComponent },
   { path: 'wso2/api-catalog', component: Wso2ApiCatalogComponent },
   { path: 'openg2p/mapping', component: OpenG2PMappingComponent },
+  { path: 'platform-sync', component: PlatformSyncComponent },
 ];

@@ -13,6 +13,7 @@ import { farmRouter } from './routes/farm.routes.js';
 import { farmerRouter } from './routes/farmer.routes.js';
 import { inventoryRouter } from './routes/inventory.routes.js';
 import { openG2PRouter } from './routes/openg2p.routes.js';
+import { platformSyncRouter } from './routes/platformSync.routes.js';
 
 const corsOptions = {
   origin: config.corsOrigin,
@@ -63,6 +64,7 @@ export function createApp() {
   app.use('/api/enrollments', enrollmentRouter);
   app.use('/api/odoo/inventory', inventoryRouter);
   app.use('/api/openg2p', openG2PRouter);
+  app.use('/api/platform-sync', platformSyncRouter);
 
   // TODO: Add future eligibility, program, Odoo, OpenG2P, WSO2, and report routes.
   app.use(notFoundHandler);

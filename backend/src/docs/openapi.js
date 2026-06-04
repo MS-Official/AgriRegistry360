@@ -87,6 +87,7 @@ export const openApiSpec = {
     { name: 'Program Enrollment', description: 'Program enrollment APIs' },
     { name: 'Odoo Inventory Reservation', description: 'Simulated Odoo inventory APIs' },
     { name: 'OpenG2P Mapping', description: 'OpenG2P mapping preparation APIs' },
+    { name: 'Platform Sync', description: 'Platform sync and WSO2 gateway APIs' },
   ],
   paths: {
     '/api/health': {
@@ -173,6 +174,107 @@ export const openApiSpec = {
     '/api/crops/{cropId}/reservations': { get: getByIdOperation('Odoo Inventory Reservation', 'Get reservations by crop', 'cropId') },
     '/api/odoo/inventory/reservations/{id}/cancel': { patch: patchOperation('Odoo Inventory Reservation', 'Cancel reservation', 'NotesRequest') },
     '/api/odoo/inventory/reservations/{id}/issue': { patch: patchOperation('Odoo Inventory Reservation', 'Issue reservation', 'NotesRequest') },
+
+    // Platform Sync endpoints
+    '/api/platform-sync/status': {
+      get: {
+        tags: ['Platform Sync'],
+        summary: 'Get platform sync counts',
+        responses: { 200: okResponse, 500: errorResponse },
+      },
+    },
+    '/api/platform-sync/logs': {
+      get: {
+        tags: ['Platform Sync'],
+        summary: 'Get all sync logs',
+        responses: { 200: okResponse, 500: errorResponse },
+      },
+    },
+    '/api/platform-sync/farmers/{farmerId}/odoo': {
+      post: {
+        tags: ['Platform Sync'],
+        summary: 'Sync farmer to Odoo',
+        parameters: [{ name: 'farmerId', in: 'path', required: true, schema: { type: 'string' } }],
+        responses: { 200: okResponse, 500: errorResponse },
+      },
+    },
+    '/api/platform-sync/farmers/{farmerId}/openg2p': {
+      post: {
+        tags: ['Platform Sync'],
+        summary: 'Sync farmer to OpenG2P',
+        parameters: [{ name: 'farmerId', in: 'path', required: true, schema: { type: 'string' } }],
+        responses: { 200: okResponse, 500: errorResponse },
+      },
+    },
+    '/api/platform-sync/farms/{farmId}/openg2p': {
+      post: {
+        tags: ['Platform Sync'],
+        summary: 'Sync farm to OpenG2P',
+        parameters: [{ name: 'farmId', in: 'path', required: true, schema: { type: 'string' } }],
+        responses: { 200: okResponse, 500: errorResponse },
+      },
+    },
+    '/api/platform-sync/crops/{cropId}/openg2p': {
+      post: {
+        tags: ['Platform Sync'],
+        summary: 'Sync crop to OpenG2P',
+        parameters: [{ name: 'cropId', in: 'path', required: true, schema: { type: 'string' } }],
+        responses: { 200: okResponse, 500: errorResponse },
+      },
+    },
+    '/api/platform-sync/enrollments/{enrollmentId}/openg2p': {
+      post: {
+        tags: ['Platform Sync'],
+        summary: 'Sync enrollment to OpenG2P',
+        parameters: [{ name: 'enrollmentId', in: 'path', required: true, schema: { type: 'string' } }],
+        responses: { 200: okResponse, 500: errorResponse },
+      },
+    },
+    '/api/platform-sync/reservations/{reservationId}/odoo': {
+      post: {
+        tags: ['Platform Sync'],
+        summary: 'Sync reservation to Odoo',
+        parameters: [{ name: 'reservationId', in: 'path', required: true, schema: { type: 'string' } }],
+        responses: { 200: okResponse, 500: errorResponse },
+      },
+    },
+    '/api/platform-sync/full-demo': {
+      post: {
+        tags: ['Platform Sync'],
+        summary: 'Trigger full end-to-end demo sync flow',
+        responses: { 200: okResponse, 500: errorResponse },
+      },
+    },
+    '/api/platform-sync/wso2/gateway-status': {
+      get: {
+        tags: ['Platform Sync'],
+        summary: 'Get WSO2 gateway configuration and readiness status',
+        responses: { 200: okResponse, 500: errorResponse },
+      },
+    },
+    '/api/platform-sync/wso2/mark-published': {
+      post: {
+        tags: ['Platform Sync'],
+        summary: 'Mark an API catalog as published in WSO2 API Manager',
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  apiName: { type: 'string', example: 'AgriRegistry360 Registry API' },
+                  context: { type: 'string', example: '/agriregistry360/registry' },
+                  gatewayUrl: { type: 'string', example: 'https://localhost:8243/agriregistry360/registry/1.0.0' },
+                },
+                required: ['apiName', 'context', 'gatewayUrl'],
+              },
+            },
+          },
+        },
+        responses: { 200: okResponse, 500: errorResponse },
+      },
+    },
   },
   components: {
     parameters: {

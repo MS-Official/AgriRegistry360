@@ -195,7 +195,7 @@ Client Demo Dashboard
 - OpenG2P mapping page in Angular
 - Future integration phase plan and TODO placeholders
 
-### Client Demo Dashboard and Final Presentation Readiness: Current Module / In Progress
+### Client Demo Dashboard and Final Presentation Readiness: Completed
 
 - Demo dashboard page at `/dashboard`
 - Dashboard summary endpoint at `/api/dashboard/summary`
@@ -207,6 +207,18 @@ Client Demo Dashboard
 - Client demo checklist
 - Final client demo readiness guide
 
+### Platform Sync + WSO2 Gateway Integration Preparation: Current Module / In Progress
+
+- Environment configuration in `.env.example` and `env.js`
+- Platform sync database schema model
+- Odoo JSON-RPC integration client
+- OpenG2P JSON-RPC integration client
+- Platform sync business services and REST endpoints
+- WSO2 gateway publishing and API catalog readiness
+- Frontend Platform Sync Center page with connection metrics, manual triggers, and logs
+- Unit test coverage verifying integration actions
+
 ## Future Modules
 
 - Reports
+

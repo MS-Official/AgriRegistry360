@@ -145,6 +145,7 @@ interface ExternalLink {
         <a class="button" routerLink="/inventory/reserve">Reserve Inventory</a>
         <a class="button secondary" routerLink="/wso2/api-catalog">View WSO2 API Catalog</a>
         <a class="button secondary" routerLink="/openg2p/mapping">View OpenG2P Mapping</a>
+        <a class="button secondary" routerLink="/platform-sync">Platform Sync Center</a>
         <a class="button secondary" *ngFor="let link of externalLinks" [href]="link.href" target="_blank" rel="noreferrer">{{ link.label }}</a>
       </div>
     </section>
@@ -423,6 +424,10 @@ export class DemoDashboardComponent implements OnInit {
     'Swagger API docs available',
     'WSO2 API catalog available',
     'OpenG2P mapping page available',
+    'Platform Sync page available',
+    'Odoo sync status visible',
+    'OpenG2P sync status visible',
+    'WSO2 gateway readiness visible',
   ];
 
   constructor(private readonly http: HttpClient) {}
