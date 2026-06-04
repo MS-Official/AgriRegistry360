@@ -1,0 +1,33 @@
+export const apiCatalog = [
+  {
+    name: 'AgriRegistry360 Registry API',
+    description: 'Farmer, Farm/Land, and Crop Registry APIs',
+    context: '/agriregistry360/registry',
+    version: '1.0.0',
+    backendBasePath: 'http://localhost:5001/api',
+    security: 'OAuth2/JWT',
+    throttling: '1000 requests/min for demo',
+    status: 'READY_FOR_WSO2_PUBLISHING',
+  },
+  {
+    name: 'AgriRegistry360 Program API',
+    description: 'Eligibility and Program Enrollment APIs',
+    context: '/agriregistry360/program',
+    version: '1.0.0',
+    backendBasePath: 'http://localhost:5001/api',
+    security: 'OAuth2/JWT',
+    throttling: '500 requests/min for demo',
+    status: 'READY_FOR_WSO2_PUBLISHING',
+  },
+  {
+    name: 'AgriRegistry360 Inventory API',
+    description: 'Odoo-style Inventory and Reservation APIs',
+    context: '/agriregistry360/inventory',
+    version: '1.0.0',
+    backendBasePath: 'http://localhost:5001/api',
+    security: 'OAuth2/JWT',
+    throttling: '300 requests/min for demo',
+    status: 'READY_FOR_WSO2_PUBLISHING',
+  },
+];
+

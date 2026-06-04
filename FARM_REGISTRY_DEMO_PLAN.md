@@ -90,6 +90,9 @@ WSO2 API Manager Exposure
 | GET | `/api/crops/:cropId/reservations` | Implemented in Odoo Inventory Reservation scope |
 | PATCH | `/api/odoo/inventory/reservations/:id/cancel` | Implemented in Odoo Inventory Reservation scope |
 | PATCH | `/api/odoo/inventory/reservations/:id/issue` | Implemented in Odoo Inventory Reservation scope |
+| GET | `/api/docs` | Implemented in WSO2 API Manager Publishing Preparation scope |
+| GET | `/api/docs.json` | Implemented in WSO2 API Manager Publishing Preparation scope |
+| GET | `/api/catalog` | Implemented in WSO2 API Manager Publishing Preparation scope |
 | GET | `/api/reports/farm-registry-summary` | Future module |
 
 ## Platform Responsibilities
@@ -156,7 +159,7 @@ WSO2 API Manager Exposure
 - Enrollment cancellation
 - Linked enrollments shown on Eligibility Details
 
-### Odoo Inventory Reservation: Current Module / In Progress
+### Odoo Inventory Reservation: Completed
 
 - Demo fertilizer inventory item seed
 - Inventory item list
@@ -167,7 +170,16 @@ WSO2 API Manager Exposure
 - Reservation stock accounting
 - Linked reservations shown on Enrollment Details
 
+### WSO2 API Manager Publishing Preparation: Current Module / In Progress
+
+- Swagger UI endpoint at `/api/docs`
+- OpenAPI JSON endpoint at `/api/docs.json`
+- WSO2-ready API catalog endpoint at `/api/catalog`
+- Registry, Program, and Inventory API grouping metadata
+- WSO2 publishing guide
+- API catalog documentation
+- Angular WSO2 API Catalog page
+
 ## Future Modules
 
-- WSO2 API Publishing
 - Reports

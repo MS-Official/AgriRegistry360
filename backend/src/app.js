@@ -1,6 +1,9 @@
 import cors from 'cors';
 import express from 'express';
+import swaggerUi from 'swagger-ui-express';
 import { config } from './config/env.js';
+import { apiCatalog } from './docs/apiCatalog.js';
+import { openApiSpec } from './docs/openapi.js';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
 import { cropRouter } from './routes/crop.routes.js';
 import { eligibilityRouter } from './routes/eligibility.routes.js';
@@ -22,6 +25,19 @@ export function createApp() {
   app.use(cors(corsOptions));
   app.options('*', cors(corsOptions));
   app.use(express.json());
+
+  app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(openApiSpec));
+
+  app.get('/api/docs.json', (req, res) => {
+    res.json(openApiSpec);
+  });
+
+  app.get('/api/catalog', (req, res) => {
+    res.json({
+      success: true,
+      data: apiCatalog,
+    });
+  });
 
   app.get('/api/health', (req, res) => {
     res.json({

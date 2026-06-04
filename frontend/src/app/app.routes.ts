@@ -12,6 +12,7 @@ import { InventoryItemsComponent } from './features/inventory/inventory-items/in
 import { InventoryReservationDetailsComponent } from './features/inventory/inventory-reservation-details/inventory-reservation-details.component';
 import { InventoryReservationListComponent } from './features/inventory/inventory-reservation-list/inventory-reservation-list.component';
 import { InventoryReserveComponent } from './features/inventory/inventory-reserve/inventory-reserve.component';
+import { Wso2ApiCatalogComponent } from './features/wso2/wso2-api-catalog/wso2-api-catalog.component';
 import { FarmerDetailsComponent } from './features/farmers/farmer-details/farmer-details.component';
 import { FarmerListComponent } from './features/farmers/farmer-list/farmer-list.component';
 import { FarmerRegistrationComponent } from './features/farmers/farmer-registration/farmer-registration.component';
@@ -40,4 +41,5 @@ export const routes: Routes = [
   { path: 'inventory/reserve', component: InventoryReserveComponent },
   { path: 'inventory/reservations', component: InventoryReservationListComponent },
   { path: 'inventory/reservations/:id', component: InventoryReservationDetailsComponent },
+  { path: 'wso2/api-catalog', component: Wso2ApiCatalogComponent },
 ];

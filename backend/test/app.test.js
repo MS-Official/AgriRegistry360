@@ -30,5 +30,28 @@ describe('App configuration', () => {
     assert.match(response.headers['access-control-allow-headers'], /Authorization/);
     assert.equal(response.headers['access-control-allow-credentials'], 'true');
   });
-});
 
+  it('returns WSO2-ready API catalog metadata', async () => {
+    const response = await request(app).get('/api/catalog').expect(200);
+
+    assert.equal(response.body.success, true);
+    assert.equal(response.body.data.length, 3);
+    assert.equal(response.body.data[0].name, 'AgriRegistry360 Registry API');
+    assert.equal(response.body.data[0].status, 'READY_FOR_WSO2_PUBLISHING');
+  });
+
+  it('returns OpenAPI JSON spec', async () => {
+    const response = await request(app).get('/api/docs.json').expect(200);
+
+    assert.equal(response.body.openapi, '3.0.3');
+    assert.equal(response.body.info.title, 'AgriRegistry360 Farm Registry API');
+    assert.ok(response.body.paths['/api/farmers/register']);
+    assert.ok(response.body.paths['/api/odoo/inventory/reservations']);
+  });
+
+  it('registers Swagger UI docs route', async () => {
+    const response = await request(app).get('/api/docs/').expect(200);
+
+    assert.match(response.text, /Swagger UI/);
+  });
+});
