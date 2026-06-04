@@ -21,3 +21,9 @@ platformSyncRouter.post('/full-demo', platformSyncController.syncFullDemo);
 // WSO2 APIs
 platformSyncRouter.get('/wso2/gateway-status', platformSyncController.getWso2GatewayStatus);
 platformSyncRouter.post('/wso2/mark-published', platformSyncController.markWso2Published);
+
+// Connection Checks
+platformSyncRouter.get('/odoo/connection-check', platformSyncController.checkOdooConnection);
+platformSyncRouter.get('/openg2p/connection-check', platformSyncController.checkOpenG2pConnection);
+platformSyncRouter.get('/wso2/connection-check', platformSyncController.checkWso2Connection);
+platformSyncRouter.get('/demo-readiness', platformSyncController.getDemoReadiness);

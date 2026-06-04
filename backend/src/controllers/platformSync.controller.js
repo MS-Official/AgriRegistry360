@@ -129,3 +129,65 @@ export async function markWso2Published(req, res, next) {
     next(error);
   }
 }
+
+export async function checkOdooConnection(req, res, next) {
+  try {
+    const check = await platformSyncService.checkOdooConnection();
+    res.json({
+      success: true,
+      platform: 'ODOO',
+      enabled: check.enabled,
+      status: check.status,
+      baseUrl: config.odooUrl,
+      message: check.message,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function checkOpenG2pConnection(req, res, next) {
+  try {
+    const check = await platformSyncService.checkOpenG2PConnection();
+    res.json({
+      success: true,
+      platform: 'OPENG2P',
+      enabled: check.enabled,
+      status: check.status,
+      baseUrl: config.openG2PUrl,
+      message: check.message,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function checkWso2Connection(req, res, next) {
+  try {
+    const check = await platformSyncService.checkWso2Connection();
+    res.json({
+      success: true,
+      platform: 'WSO2',
+      enabled: check.enabled,
+      status: check.status,
+      baseUrl: config.wso2GatewayBaseUrl,
+      message: check.message,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getDemoReadiness(req, res, next) {
+  try {
+    const readiness = await platformSyncService.getDemoReadiness();
+    res.json({
+      success: true,
+      message: 'Platform demo readiness retrieved successfully',
+      data: readiness,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+

@@ -122,4 +122,46 @@ export const openG2PClient = {
       [values],
     ]);
   },
+
+  /**
+   * Check connection to OpenG2P database by trying to authenticate.
+   */
+  async checkConnection() {
+    if (!config.openG2PEnabled) {
+      return {
+        enabled: false,
+        status: 'DISABLED',
+        message: 'OpenG2P integration is disabled in configuration',
+      };
+    }
+
+    try {
+      const uid = await callOpenG2PRpc('common', 'authenticate', [
+        config.openG2PDb,
+        config.openG2PUsername,
+        config.openG2PPassword,
+        {},
+      ]);
+
+      if (uid) {
+        return {
+          enabled: true,
+          status: 'CONNECTED',
+          message: 'Connection successful. Authenticated with OpenG2P database.',
+        };
+      } else {
+        return {
+          enabled: true,
+          status: 'FAILED',
+          message: 'Authentication failed: Invalid credentials or database name.',
+        };
+      }
+    } catch (error) {
+      return {
+        enabled: true,
+        status: 'FAILED',
+        message: error.message,
+      };
+    }
+  },
 };

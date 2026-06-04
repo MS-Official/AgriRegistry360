@@ -56,6 +56,19 @@ interface ExternalLink {
       </div>
     </section>
 
+    <!-- Platform Sync Ribbon -->
+    <div *ngIf="readiness" class="panel" style="margin-bottom: 20px; background: var(--surface-strong); border-color: var(--border); padding: 12px 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+      <div>
+        <strong style="color: var(--primary-strong);">Platform Connectivity:</strong>
+        <span style="margin-left: 10px; font-size: 13.5px; color: var(--muted);">
+          Odoo ERP: <strong [style.color]="getReadinessColor(readiness.odoo)">{{ readiness.odoo }}</strong> | 
+          OpenG2P: <strong [style.color]="getReadinessColor(readiness.openG2P)">{{ readiness.openG2P }}</strong> | 
+          WSO2 Gateway: <strong [style.color]="getReadinessColor(readiness.wso2)">{{ readiness.wso2 }}</strong>
+        </span>
+      </div>
+      <a class="inline-link" routerLink="/platform-sync" style="font-size: 13px; font-weight: bold; text-decoration: none;">Manage Platforms ➔</a>
+    </div>
+
     <div *ngIf="errorMessage" class="message error">{{ errorMessage }}</div>
 
     <section class="grid summary-grid" aria-label="Dashboard summary">
@@ -341,6 +354,7 @@ interface ExternalLink {
   ],
 })
 export class DemoDashboardComponent implements OnInit {
+  readiness: any = null;
   summary: DashboardSummary = {
     totalFarmers: 0,
     totalFarms: 0,
@@ -444,6 +458,22 @@ export class DemoDashboardComponent implements OnInit {
           this.errorMessage = 'Dashboard summary could not be loaded. Confirm the backend is running on port 5001.';
         },
       });
+
+    this.http
+      .get<ApiResponse<any>>(`${environment.apiUrl}/platform-sync/demo-readiness`)
+      .subscribe({
+        next: (response) => {
+          this.readiness = response.data;
+        },
+      });
+  }
+
+  getReadinessColor(status: string | undefined): string {
+    if (!status) return 'var(--muted)';
+    if (status === 'CONNECTED' || status === 'PUBLISHED') return 'var(--success)';
+    if (status === 'FAILED') return 'var(--danger)';
+    if (status === 'DEMO_MODE' || status === 'READY_FOR_PUBLISHING') return 'var(--warning)';
+    return 'var(--muted)';
   }
 
   get summaryCards(): SummaryCard[] {

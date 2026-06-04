@@ -128,16 +128,56 @@ AgriRegistry360 provides built-in metadata catalog configuration so WSO2 API Man
 
 ---
 
-## Demo Walkthrough Guide
+## Demo Mode vs Live Sync Mode
 
-To present this module to the client:
-1. Navigate to the **Platform Sync Center** page (`http://localhost:4200/platform-sync`).
-2. Point out the connection cards showing current config status. Emphasize that the system can switch from **Demo Mode** to **Live Mode** simply by toggling env variables.
-3. Scroll down to the **Demonstration Sync** card. Click **Sync Full Demo Flow**.
-4. Show the client the real-time checklist execution:
-   - Syncing the farmer Mohamed Ameen to Odoo.
-   - Syncing the farmer to OpenG2P registrant list.
-   - Syncing land and crop details to OpenG2P.
-   - Creating program membership on OpenG2P.
-   - Allocating inventory stocks in Odoo ERP.
-5. Point out the newly populated sync logs in the history table showing database details and mock payload objects.
+AgriRegistry360 supports dual-mode integration:
+1. **Demo Mode (Fallback):** Activated when platform environment variables are set to `false`. Payload checks are performed, mock sync ids are returned, and results are safely logged.
+2. **Live Sync Mode:** Activated when variables are enabled (`*_ENABLED=true`). Real JSON-RPC requests are dispatched to Odoo ERP or OpenG2P endpoints, and reachability pings are sent to WSO2 API Manager.
+
+---
+
+## Live Platform Verification Steps
+
+### A. Odoo UI Verification
+1. Log in to your Odoo portal at `http://localhost:8069`.
+2. Open the **Contacts** application.
+3. Search for `Mohamed Ameen` or reference ID `FARMER-0001`. Confirm the contact profile matches the synced details.
+4. Open the **Inventory / Products** application. Search for SKU `FERTILIZER_50KG` to verify stock allocations.
+
+### B. OpenG2P UI Verification
+1. Log in to your OpenG2P Odoo console at `http://localhost:8069` (or configured OpenG2P instance).
+2. Go to **Welfare registries ➔ Registrants** (or Contacts if custom models fallback is used).
+3. Search for the registrant ID `FARMER-0001` to view the synced farmer details, linked farm layouts, and crop cultivation data.
+4. Navigate to **Programs ➔ Memberships** (or program membership lists) to verify enrollment mapping.
+
+### C. WSO2 API Manager Verification
+1. Open WSO2 Publisher console at `https://localhost:9443/publisher`.
+2. Verify that the imported APIs are published and show in the active list.
+3. Open WSO2 Developer Portal at `https://localhost:9443/devportal`. Verify that key subscriptions can be generated and invoked.
+
+---
+
+## Demo Walkthrough & Client Script
+
+When presenting this integration to the client, use the following interactive script:
+
+### 1. Show Platform Connectivity & Demo Readiness
+- **What to do:** Open `http://localhost:4200/platform-sync`.
+- **What to say:**
+  > "Here is our Platform Sync Center. This page shows the connection status of AgriRegistry360 to Odoo ERP, OpenG2P, and WSO2 API Manager. We can click 'Check Connection' for each platform to perform a real-time authentication test. If a service is down, it gracefully defaults to Demo Mode so the demo can run under any circumstances."
+
+### 2. Execute Demo Sync
+- **What to do:** Click the **Sync Full Demo Flow** button. Show the progress indicators.
+- **What to say:**
+  > "I will now trigger a full demo sync. This takes the local database records for farmer Mohamed Ameen, farm layouts, crop variety, eligibility results, enrollments, and reserves inventory. The system maps and uploads them sequentially to Odoo ERP and OpenG2P."
+
+### 3. Review Synced Payload Logs
+- **What to do:** Scroll to the **Platform Sync History** table. Click **View JSON** on a synced record to expand the payload.
+- **What to say:**
+  > "We can view the exact JSON payload structures sent to Odoo or OpenG2P, and the response payloads they returned. This proves that our schema maps directly to Odoo's Contacts/Partner databases and OpenG2P's welfare membership models."
+
+### 4. Verify in Platform UIs
+- **What to do:** Click the Odoo/OpenG2P UI link to show the synced contact in Odoo.
+- **What to say:**
+  > "If we log in to Odoo, we can see that Mohamed Ameen has been automatically registered as a contact, and the inventory reservation is logged and ready for dispatch. All of these platforms now work together seamlessly."
+

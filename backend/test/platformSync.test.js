@@ -233,4 +233,31 @@ describe('Platform Sync API', () => {
     assert.equal(response.body.data.syncStatus, 'SYNCED');
     assert.equal(response.body.data.entityCode, 'AgriRegistry360 Registry API');
   });
+
+  it('returns DISABLED connection checks when platform integrations are disabled', async () => {
+    const odooRes = await request(app).get('/api/platform-sync/odoo/connection-check').expect(200);
+    assert.equal(odooRes.body.success, true);
+    assert.equal(odooRes.body.enabled, false);
+    assert.equal(odooRes.body.status, 'DISABLED');
+
+    const openg2pRes = await request(app).get('/api/platform-sync/openg2p/connection-check').expect(200);
+    assert.equal(openg2pRes.body.success, true);
+    assert.equal(openg2pRes.body.enabled, false);
+    assert.equal(openg2pRes.body.status, 'DISABLED');
+
+    const wso2Res = await request(app).get('/api/platform-sync/wso2/connection-check').expect(200);
+    assert.equal(wso2Res.body.success, true);
+    assert.equal(wso2Res.body.enabled, false);
+    assert.equal(wso2Res.body.status, 'DISABLED');
+  });
+
+  it('returns successful status on the demo readiness endpoint', async () => {
+    const response = await request(app).get('/api/platform-sync/demo-readiness').expect(200);
+    assert.equal(response.body.success, true);
+    assert.equal(response.body.data.backend, 'READY');
+    assert.equal(response.body.data.mongodb, 'READY');
+    assert.equal(response.body.data.odoo, 'DEMO_MODE');
+    assert.equal(response.body.data.openG2P, 'DEMO_MODE');
+    assert.equal(response.body.data.wso2, 'READY_FOR_PUBLISHING');
+  });
 });

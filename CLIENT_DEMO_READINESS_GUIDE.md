@@ -126,3 +126,45 @@ WSO2 API Manager is the target API governance layer. In the demo, Swagger, OpenA
 - Publish APIs through WSO2 API Manager with OAuth2/JWT security and throttling.
 - Add production authentication and role-based access control.
 - Add deployment configuration, monitoring, backups, and operational reports.
+
+---
+
+## Final Client Demo Section: Showing All Platforms Working Together
+
+Follow this step-by-step presentation script to demonstrate that all platforms function cooperatively:
+
+1. **Open AgriRegistry360 Dashboard**
+   - Navigate to `http://localhost:4200/dashboard`.
+   - Point out the **Platform Connectivity** status bar showing the live connection state of local Odoo ERP, OpenG2P, and WSO2 APIM servers.
+
+2. **Recount the Mohamed Ameen Flow**
+   - Use the **Demo Story** card to explain the business lifecycle of Mohamed Ameen (Farmer ➔ Farm ➔ Crop ➔ Eligibility Check ➔ Enrollment ➔ Reservation).
+
+3. **Open Platform Sync Center**
+   - Click **Manage Platforms** or navigate to `http://localhost:4200/platform-sync`.
+   - Show the cards detailing the Odoo, OpenG2P, and WSO2 roles in the system.
+
+4. **Verify Connectivity**
+   - Click **Check Connection** on each of the cards to verify live database authentication check results immediately.
+
+5. **Trigger Cascade Demo Sync**
+   - Click **Sync Full Demo Flow** and show the client the progress steps checking off green.
+
+6. **Examine JSON Payloads**
+   - In the **Platform Sync History** table, click **View JSON** on synced logs to show the precise REST payloads transmitted and retrieved.
+
+7. **Show Synced Contacts in Odoo ERP**
+   - Open Odoo UI (`http://localhost:8069`), navigate to **Contacts**, search for `Mohamed Ameen` (ID: `FARMER-0001`), and show the synced profile details.
+
+8. **Show Synced Beneficiary in OpenG2P**
+   - In the OpenG2P registry UI, show the mapped registrant ID and program memberships.
+
+9. **Examine WSO2 API Manager Publisher**
+   - Open `https://localhost:9443/publisher` and show the imported and published API definitions.
+
+10. **Examine Developer Portal Subscriptions**
+    - Open `https://localhost:9443/devportal` and show the active application subscription and generated gateway invoke tokens.
+
+11. **Explain production Gateway Routing**
+    - Explain that in production mode, all frontend calls route through the WSO2 API Gateway port `8243` to enforce enterprise-grade security and monitoring.
+

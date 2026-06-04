@@ -275,6 +275,34 @@ export const openApiSpec = {
         responses: { 200: okResponse, 500: errorResponse },
       },
     },
+    '/api/platform-sync/odoo/connection-check': {
+      get: {
+        tags: ['Platform Sync'],
+        summary: 'Check connection to Odoo ERP instance',
+        responses: { 200: okResponse, 500: errorResponse },
+      },
+    },
+    '/api/platform-sync/openg2p/connection-check': {
+      get: {
+        tags: ['Platform Sync'],
+        summary: 'Check connection to OpenG2P instance',
+        responses: { 200: okResponse, 500: errorResponse },
+      },
+    },
+    '/api/platform-sync/wso2/connection-check': {
+      get: {
+        tags: ['Platform Sync'],
+        summary: 'Check connection to WSO2 API Manager base URL',
+        responses: { 200: okResponse, 500: errorResponse },
+      },
+    },
+    '/api/platform-sync/demo-readiness': {
+      get: {
+        tags: ['Platform Sync'],
+        summary: 'Check the live demo readiness status across all backend and platform modules',
+        responses: { 200: okResponse, 500: errorResponse },
+      },
+    },
   },
   components: {
     parameters: {

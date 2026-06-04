@@ -129,4 +129,46 @@ export const odooClient = {
       [recordIds, values],
     ]);
   },
+
+  /**
+   * Check connection to Odoo database by trying to authenticate.
+   */
+  async checkConnection() {
+    if (!config.odooEnabled) {
+      return {
+        enabled: false,
+        status: 'DISABLED',
+        message: 'Odoo integration is disabled in configuration',
+      };
+    }
+
+    try {
+      const uid = await callOdooRpc('common', 'authenticate', [
+        config.odooDb,
+        config.odooUsername,
+        config.odooPassword,
+        {},
+      ]);
+
+      if (uid) {
+        return {
+          enabled: true,
+          status: 'CONNECTED',
+          message: 'Connection successful. Authenticated with Odoo database.',
+        };
+      } else {
+        return {
+          enabled: true,
+          status: 'FAILED',
+          message: 'Authentication failed: Invalid credentials or database name.',
+        };
+      }
+    } catch (error) {
+      return {
+        enabled: true,
+        status: 'FAILED',
+        message: error.message,
+      };
+    }
+  },
 };

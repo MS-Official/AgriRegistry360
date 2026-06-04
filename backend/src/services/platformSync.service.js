@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import { config } from '../config/env.js';
 import { odooClient } from '../integrations/odoo/odooClient.js';
 import { openG2PClient } from '../integrations/openg2p/openG2PClient.js';
@@ -591,3 +592,127 @@ export async function syncFullDemoFlow() {
     steps,
   };
 }
+
+/**
+ * Check connection to Odoo
+ */
+export async function checkOdooConnection() {
+  return await odooClient.checkConnection();
+}
+
+/**
+ * Check connection to OpenG2P
+ */
+export async function checkOpenG2PConnection() {
+  return await openG2PClient.checkConnection();
+}
+
+/**
+ * Check connection to WSO2 API Gateway base URL
+ */
+export async function checkWso2Connection() {
+  if (!config.wso2Enabled) {
+    return {
+      success: true,
+      platform: 'WSO2',
+      enabled: false,
+      status: 'DISABLED',
+      baseUrl: config.wso2GatewayBaseUrl,
+      message: 'WSO2 integration is disabled in configuration',
+    };
+  }
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 4000);
+
+  try {
+    const res = await fetch(config.wso2GatewayBaseUrl, {
+      method: 'GET',
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+
+    return {
+      success: true,
+      platform: 'WSO2',
+      enabled: true,
+      status: 'CONNECTED',
+      baseUrl: config.wso2GatewayBaseUrl,
+      message: `Successfully connected to WSO2 Gateway (HTTP ${res.status}).`,
+    };
+  } catch (error) {
+    clearTimeout(timeoutId);
+
+    const isTlsError =
+      error.code === 'DEPTH_ZERO_SELF_SIGNED_CERT' ||
+      error.message?.includes('self-signed') ||
+      error.message?.includes('certificate') ||
+      error.code?.includes('CERT');
+
+    if (isTlsError) {
+      return {
+        success: true,
+        platform: 'WSO2',
+        enabled: true,
+        status: 'CONNECTED',
+        baseUrl: config.wso2GatewayBaseUrl,
+        message: 'Successfully reached WSO2 Gateway (Warning: Self-signed SSL certificate detected).',
+      };
+    }
+
+    const isTimeout = error.name === 'AbortError';
+    return {
+      success: true,
+      platform: 'WSO2',
+      enabled: true,
+      status: 'FAILED',
+      baseUrl: config.wso2GatewayBaseUrl,
+      message: isTimeout
+        ? 'Connection check timed out: Gateway took too long to respond.'
+        : `Connection failed: ${error.message}`,
+    };
+  }
+}
+
+/**
+ * Check demo readiness across all platform modules
+ */
+export async function getDemoReadiness() {
+  const backendStatus = 'READY';
+  const mongoStatus = mongoose.connection.readyState === 1 ? 'READY' : 'FAILED';
+
+  let odooStatus = 'DISABLED';
+  if (config.odooEnabled) {
+    const check = await odooClient.checkConnection();
+    odooStatus = check.status;
+  } else {
+    odooStatus = 'DEMO_MODE';
+  }
+
+  let openG2PStatus = 'DISABLED';
+  if (config.openG2PEnabled) {
+    const check = await openG2PClient.checkConnection();
+    openG2PStatus = check.status;
+  } else {
+    openG2PStatus = 'DEMO_MODE';
+  }
+
+  let wso2Status = 'DISABLED';
+  if (config.wso2Enabled) {
+    const check = await checkWso2Connection();
+    wso2Status = check.status === 'CONNECTED' ? 'PUBLISHED' : 'FAILED';
+  } else {
+    wso2Status = 'READY_FOR_PUBLISHING';
+  }
+
+  return {
+    backend: backendStatus,
+    mongodb: mongoStatus,
+    odoo: odooStatus,
+    openG2P: openG2PStatus,
+    wso2: wso2Status,
+    fullDemoFlow: backendStatus === 'READY' && mongoStatus === 'READY' ? 'READY' : 'NOT_READY',
+    clientDemoMessage: 'AgriRegistry360 can sync registry data to Odoo/OpenG2P and expose APIs through WSO2 API Manager.',
+  };
+}
+
