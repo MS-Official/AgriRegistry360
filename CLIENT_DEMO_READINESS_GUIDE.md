@@ -129,42 +129,47 @@ WSO2 API Manager is the target API governance layer. In the demo, Swagger, OpenA
 
 ---
 
-## Final Client Demo Section: Showing All Platforms Working Together
+## Final Live Platform Demo Script
 
-Follow this step-by-step presentation script to demonstrate that all platforms function cooperatively:
+### Script Steps:
 
-1. **Open AgriRegistry360 Dashboard**
+1. **Open Dashboard.**
    - Navigate to `http://localhost:4200/dashboard`.
-   - Point out the **Platform Connectivity** status bar showing the live connection state of local Odoo ERP, OpenG2P, and WSO2 APIM servers.
+   - Point out the **Platform Connectivity** status bar showing the connection state of local Odoo ERP, OpenG2P, and WSO2 APIM servers.
 
-2. **Recount the Mohamed Ameen Flow**
-   - Use the **Demo Story** card to explain the business lifecycle of Mohamed Ameen (Farmer ➔ Farm ➔ Crop ➔ Eligibility Check ➔ Enrollment ➔ Reservation).
+2. **Explain the full farm registry flow.**
+   - Walk through the Mohamed Ameen story card from Farmer Registry to Inventory Reservation.
 
-3. **Open Platform Sync Center**
+3. **Open Platform Sync Center.**
    - Click **Manage Platforms** or navigate to `http://localhost:4200/platform-sync`.
-   - Show the cards detailing the Odoo, OpenG2P, and WSO2 roles in the system.
 
-4. **Verify Connectivity**
-   - Click **Check Connection** on each of the cards to verify live database authentication check results immediately.
+4. **Show Odoo/OpenG2P/WSO2 connection cards.**
+   - Point out base URLs, roles, and status fields on each platform card.
 
-5. **Trigger Cascade Demo Sync**
-   - Click **Sync Full Demo Flow** and show the client the progress steps checking off green.
+5. **Run connection checks.**
+   - Click **Check Odoo Connection**, **Check OpenG2P Connection**, and **Check WSO2 Connection** to confirm connectivity statuses.
 
-6. **Examine JSON Payloads**
-   - In the **Platform Sync History** table, click **View JSON** on synced logs to show the precise REST payloads transmitted and retrieved.
+6. **Click Sync Full Demo Flow.**
+   - Trigger the full cascade sync by clicking the button.
 
-7. **Show Synced Contacts in Odoo ERP**
-   - Open Odoo UI (`http://localhost:8069`), navigate to **Contacts**, search for `Mohamed Ameen` (ID: `FARMER-0001`), and show the synced profile details.
+7. **Show sync logs and payloads.**
+   - Show the green checked step-by-step progress cards, click **View Payload** to expand and review request and response JSON payloads.
 
-8. **Show Synced Beneficiary in OpenG2P**
-   - In the OpenG2P registry UI, show the mapped registrant ID and program memberships.
+8. **Open Odoo UI and show synced farmer/contact or inventory item.**
+   - Open Odoo UI (`http://localhost:8069`), check the Contacts module for Mohamed Ameen, or review the seed products.
 
-9. **Examine WSO2 API Manager Publisher**
-   - Open `https://localhost:9443/publisher` and show the imported and published API definitions.
+9. **Open OpenG2P UI and show mapped registrant/program data or fallback mapping.**
+   - Open OpenG2P Odoo UI (`http://localhost:8069`), verify the registrant membership mapping or partner fallback logs.
 
-10. **Examine Developer Portal Subscriptions**
-    - Open `https://localhost:9443/devportal` and show the active application subscription and generated gateway invoke tokens.
+10. **Open WSO2 Publisher and show imported APIs.**
+    - Open WSO2 Publisher UI (`https://localhost:9443/publisher`) to show imported and published API definitions.
 
-11. **Explain production Gateway Routing**
-    - Explain that in production mode, all frontend calls route through the WSO2 API Gateway port `8243` to enforce enterprise-grade security and monitoring.
+11. **Open WSO2 Developer Portal and explain Gateway URL.**
+    - Open WSO2 Developer Portal (`https://localhost:9443/devportal`) and point out the production gateway URL endpoints.
+
+12. **Explain production architecture:**
+    - Explain how in a live production environment, the integration flow works as follows:
+      ```text
+      Frontend UI (Angular) → WSO2 API Manager (Gateway) → AgriRegistry360 Backend (Express) → OpenG2P / Odoo ERP
+      ```
 

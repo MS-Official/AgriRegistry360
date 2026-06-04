@@ -138,6 +138,7 @@ export const odooClient = {
       return {
         enabled: false,
         status: 'DISABLED',
+        baseUrl: config.odooUrl,
         message: 'Odoo integration is disabled in configuration',
       };
     }
@@ -154,12 +155,14 @@ export const odooClient = {
         return {
           enabled: true,
           status: 'CONNECTED',
+          baseUrl: config.odooUrl,
           message: 'Connection successful. Authenticated with Odoo database.',
         };
       } else {
         return {
           enabled: true,
           status: 'FAILED',
+          baseUrl: config.odooUrl,
           message: 'Authentication failed: Invalid credentials or database name.',
         };
       }
@@ -167,6 +170,7 @@ export const odooClient = {
       return {
         enabled: true,
         status: 'FAILED',
+        baseUrl: config.odooUrl,
         message: error.message,
       };
     }

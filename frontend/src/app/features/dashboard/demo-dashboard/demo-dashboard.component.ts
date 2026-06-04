@@ -459,6 +459,10 @@ export class DemoDashboardComponent implements OnInit {
         },
       });
 
+    this.loadDemoReadiness();
+  }
+
+  loadDemoReadiness(): void {
     this.http
       .get<ApiResponse<any>>(`${environment.apiUrl}/platform-sync/demo-readiness`)
       .subscribe({

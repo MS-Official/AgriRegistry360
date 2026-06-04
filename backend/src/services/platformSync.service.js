@@ -172,11 +172,24 @@ export async function syncFarmerToOpenG2P(farmerId) {
   try {
     let externalId = '';
     let response = null;
+    let targetModelUsed = model;
+    let warning = '';
+    let syncStatus = mode;
 
     if (config.openG2PEnabled) {
-      const newId = await openG2PClient.createRegistrantOrBeneficiary(payload);
-      externalId = String(newId);
-      response = { success: true, openG2PId: newId };
+      const exists = await openG2PClient.checkModelExists(model);
+      if (exists) {
+        const newId = await openG2PClient.createRecord(model, payload);
+        externalId = String(newId);
+        response = { success: true, openG2PId: newId };
+      } else {
+        targetModelUsed = 'res.partner';
+        const fallbackId = await openG2PClient.createRecord('res.partner', payload);
+        externalId = `G2P-FALLBACK-PARTNER-${fallbackId}`;
+        warning = 'OpenG2P connection works, but exact PBMS model was unavailable. Fallback mapping used.';
+        response = { success: true, mode: 'g2p_fallback', partnerId: fallbackId };
+        syncStatus = 'DEMO_MODE';
+      }
     } else {
       externalId = `DEMO-G2P-REGISTRANT-${farmer.farmerCode}`;
       response = { success: true, mode: 'demo', simulatedId: externalId };
@@ -187,11 +200,12 @@ export async function syncFarmerToOpenG2P(farmerId) {
       entityId: farmer._id.toString(),
       entityCode: farmer.farmerCode,
       platform: 'OPENG2P',
-      targetModel: model,
-      syncStatus: mode,
+      targetModel: targetModelUsed,
+      syncStatus: syncStatus,
       requestPayload: payload,
       responsePayload: response,
       targetExternalId: externalId,
+      errorMessage: warning,
     });
 
     return log;
@@ -228,17 +242,30 @@ export async function syncFarmToOpenG2P(farmId) {
     comment: `Ownership: ${farm.ownershipType}, Size: ${farm.totalSize} ${farm.sizeUnit}, Farmer Ref: ${farm.farmerCode}`,
   };
 
-  const model = 'res.partner'; // Default fallback mapping for farm
+  const model = 'g2p.agriculture.farm';
   const mode = config.openG2PEnabled ? 'SYNCED' : 'DEMO_MODE';
 
   try {
     let externalId = '';
     let response = null;
+    let targetModelUsed = model;
+    let warning = '';
+    let syncStatus = mode;
 
     if (config.openG2PEnabled) {
-      const newId = await openG2PClient.createRegistrantOrBeneficiary(payload);
-      externalId = String(newId);
-      response = { success: true, farmPartnerId: newId };
+      const exists = await openG2PClient.checkModelExists(model);
+      if (exists) {
+        const newId = await openG2PClient.createRecord(model, payload);
+        externalId = String(newId);
+        response = { success: true, farmId: newId };
+      } else {
+        targetModelUsed = 'res.partner';
+        const fallbackId = await openG2PClient.createRecord('res.partner', payload);
+        externalId = `G2P-FALLBACK-FARM-${fallbackId}`;
+        warning = 'OpenG2P connection works, but exact PBMS model was unavailable. Fallback mapping used.';
+        response = { success: true, mode: 'g2p_fallback', partnerId: fallbackId };
+        syncStatus = 'DEMO_MODE';
+      }
     } else {
       externalId = `DEMO-G2P-FARM-${farm.farmCode}`;
       response = { success: true, mode: 'demo', simulatedId: externalId };
@@ -249,11 +276,12 @@ export async function syncFarmToOpenG2P(farmId) {
       entityId: farm._id.toString(),
       entityCode: farm.farmCode,
       platform: 'OPENG2P',
-      targetModel: model,
-      syncStatus: mode,
+      targetModel: targetModelUsed,
+      syncStatus: syncStatus,
       requestPayload: payload,
       responsePayload: response,
       targetExternalId: externalId,
+      errorMessage: warning,
     });
 
     return log;
@@ -288,17 +316,30 @@ export async function syncCropToOpenG2P(cropId) {
     comment: `Season: ${crop.season}, Expected Yield: ${crop.expectedYield} ${crop.yieldUnit}, Farm Ref: ${crop.farmCode}`,
   };
 
-  const model = 'res.partner'; // Default fallback mapping for crop details
+  const model = 'g2p.agriculture.crop';
   const mode = config.openG2PEnabled ? 'SYNCED' : 'DEMO_MODE';
 
   try {
     let externalId = '';
     let response = null;
+    let targetModelUsed = model;
+    let warning = '';
+    let syncStatus = mode;
 
     if (config.openG2PEnabled) {
-      const newId = await openG2PClient.createRegistrantOrBeneficiary(payload);
-      externalId = String(newId);
-      response = { success: true, cropPartnerId: newId };
+      const exists = await openG2PClient.checkModelExists(model);
+      if (exists) {
+        const newId = await openG2PClient.createRecord(model, payload);
+        externalId = String(newId);
+        response = { success: true, cropId: newId };
+      } else {
+        targetModelUsed = 'res.partner';
+        const fallbackId = await openG2PClient.createRecord('res.partner', payload);
+        externalId = `G2P-FALLBACK-CROP-${fallbackId}`;
+        warning = 'OpenG2P connection works, but exact PBMS model was unavailable. Fallback mapping used.';
+        response = { success: true, mode: 'g2p_fallback', partnerId: fallbackId };
+        syncStatus = 'DEMO_MODE';
+      }
     } else {
       externalId = `DEMO-G2P-CROP-${crop.cropCode}`;
       response = { success: true, mode: 'demo', simulatedId: externalId };
@@ -309,11 +350,12 @@ export async function syncCropToOpenG2P(cropId) {
       entityId: crop._id.toString(),
       entityCode: crop.cropCode,
       platform: 'OPENG2P',
-      targetModel: model,
-      syncStatus: mode,
+      targetModel: targetModelUsed,
+      syncStatus: syncStatus,
       requestPayload: payload,
       responsePayload: response,
       targetExternalId: externalId,
+      errorMessage: warning,
     });
 
     return log;
@@ -355,11 +397,29 @@ export async function syncEnrollmentToOpenG2P(enrollmentId) {
   try {
     let externalId = '';
     let response = null;
+    let targetModelUsed = model;
+    let warning = '';
+    let syncStatus = mode;
 
     if (config.openG2PEnabled) {
-      const newId = await openG2PClient.createProgramEnrollmentMapping(payload);
-      externalId = String(newId);
-      response = { success: true, openG2PEnrollmentId: newId };
+      const exists = await openG2PClient.checkModelExists(model);
+      if (exists) {
+        const newId = await openG2PClient.createRecord(model, payload);
+        externalId = String(newId);
+        response = { success: true, openG2PEnrollmentId: newId };
+      } else {
+        targetModelUsed = 'res.partner';
+        const fallbackPayload = {
+          name: `Enrollment: ${payload.membership_ref}`,
+          ref: payload.membership_ref,
+          comment: `Program: ${payload.program_id}, Farmer Ref: ${payload.partner_id}, State: ${payload.state}`,
+        };
+        const fallbackId = await openG2PClient.createRecord('res.partner', fallbackPayload);
+        externalId = `G2P-FALLBACK-ENROLL-${fallbackId}`;
+        warning = 'OpenG2P connection works, but exact PBMS model was unavailable. Fallback mapping used.';
+        response = { success: true, mode: 'g2p_fallback', partnerId: fallbackId };
+        syncStatus = 'DEMO_MODE';
+      }
     } else {
       externalId = `DEMO-G2P-MEMBERSHIP-${enrollment.enrollmentCode}`;
       response = { success: true, mode: 'demo', simulatedId: externalId };
@@ -370,11 +430,12 @@ export async function syncEnrollmentToOpenG2P(enrollmentId) {
       entityId: enrollment._id.toString(),
       entityCode: enrollment.enrollmentCode,
       platform: 'OPENG2P',
-      targetModel: model,
-      syncStatus: mode,
+      targetModel: targetModelUsed,
+      syncStatus: syncStatus,
       requestPayload: payload,
       responsePayload: response,
       targetExternalId: externalId,
+      errorMessage: warning,
     });
 
     return log;
@@ -419,27 +480,36 @@ export async function syncReservationToOdoo(reservationId) {
   try {
     let externalId = '';
     let response = null;
+    let warning = '';
+    let syncStatus = mode;
 
     if (config.odooEnabled) {
-      // Check if product exists in Odoo. If not, create it
-      const existingProduct = await odooClient.searchRead('product.product', [['default_code', '=', reservation.itemCode]], ['id']);
-      let productId = existingProduct && existingProduct.length > 0 ? existingProduct[0].id : null;
-      if (!productId) {
-        productId = await odooClient.create('product.product', {
-          name: reservation.itemName,
-          default_code: reservation.itemCode,
-          type: 'product',
+      try {
+        // Check if product exists in Odoo. If not, create it
+        const existingProduct = await odooClient.searchRead('product.product', [['default_code', '=', reservation.itemCode]], ['id']);
+        let productId = existingProduct && existingProduct.length > 0 ? existingProduct[0].id : null;
+        if (!productId) {
+          productId = await odooClient.create('product.product', {
+            name: reservation.itemName,
+            default_code: reservation.itemCode,
+            type: 'product',
+          });
+        }
+
+        // Record reservation details in product.template or similar log
+        const newId = await odooClient.create('res.partner', {
+          name: `Reservation: ${reservation.reservationCode} - ${reservation.itemName}`,
+          comment: `Reserved ${reservation.reservedQuantity} of ${reservation.itemName} for ${reservation.farmerName}. Enrollment: ${reservation.enrollmentCode}`,
         });
+
+        externalId = `ODOO-RESERVE-${newId}`;
+        response = { success: true, odooId: newId, productId };
+      } catch (innerError) {
+        externalId = `DEMO-ODOO-RESERVE-${reservation.reservationCode}`;
+        response = { success: true, mode: 'demo_fallback', simulatedId: externalId };
+        warning = 'Connected to Odoo, but target inventory model was unavailable. Demo sync log created.';
+        syncStatus = 'DEMO_MODE';
       }
-
-      // Record reservation details in product.template or similar log
-      const newId = await odooClient.create('res.partner', {
-        name: `Reservation: ${reservation.reservationCode} - ${reservation.itemName}`,
-        comment: `Reserved ${reservation.reservedQuantity} of ${reservation.itemName} for ${reservation.farmerName}. Enrollment: ${reservation.enrollmentCode}`,
-      });
-
-      externalId = `ODOO-RESERVE-${newId}`;
-      response = { success: true, odooId: newId, productId };
     } else {
       externalId = `DEMO-ODOO-RESERVE-${reservation.reservationCode}`;
       response = { success: true, mode: 'demo', simulatedId: externalId };
@@ -451,10 +521,11 @@ export async function syncReservationToOdoo(reservationId) {
       entityCode: reservation.reservationCode,
       platform: 'ODOO',
       targetModel: model,
-      syncStatus: mode,
+      syncStatus: syncStatus,
       requestPayload: payload,
       responsePayload: response,
       targetExternalId: externalId,
+      errorMessage: warning,
     });
 
     return log;
@@ -498,21 +569,29 @@ export async function syncFullDemoFlow() {
   // Sync farmer to Odoo
   const odooFarmerLog = await syncFarmerToOdoo(farmer._id);
   steps.push({
-    step: 'Sync farmer to Odoo',
+    step: 'Farmer → Odoo Contact/Partner',
     entityCode: farmer.farmerCode,
     platform: 'ODOO',
+    targetModel: odooFarmerLog.targetModel || 'res.partner',
+    syncMode: config.odooEnabled ? 'LIVE' : 'DEMO_MODE',
     syncStatus: odooFarmerLog.syncStatus,
     errorMessage: odooFarmerLog.errorMessage,
+    requestPayload: odooFarmerLog.requestPayload,
+    responsePayload: odooFarmerLog.responsePayload,
   });
 
   // Sync farmer to OpenG2P
   const g2pFarmerLog = await syncFarmerToOpenG2P(farmer._id);
   steps.push({
-    step: 'Sync farmer to OpenG2P',
+    step: 'Farmer → OpenG2P Registrant/Beneficiary',
     entityCode: farmer.farmerCode,
     platform: 'OPENG2P',
+    targetModel: g2pFarmerLog.targetModel || config.openG2PRegistrantModel,
+    syncMode: config.openG2PEnabled ? 'LIVE' : 'DEMO_MODE',
     syncStatus: g2pFarmerLog.syncStatus,
     errorMessage: g2pFarmerLog.errorMessage,
+    requestPayload: g2pFarmerLog.requestPayload,
+    responsePayload: g2pFarmerLog.responsePayload,
   });
 
   // 2. Find linked farm
@@ -520,11 +599,15 @@ export async function syncFullDemoFlow() {
   if (farm) {
     const farmLog = await syncFarmToOpenG2P(farm._id);
     steps.push({
-      step: 'Sync farm to OpenG2P',
+      step: 'Farm → OpenG2P Agriculture Registry Extension',
       entityCode: farm.farmCode,
       platform: 'OPENG2P',
+      targetModel: farmLog.targetModel || 'g2p.agriculture.farm',
+      syncMode: config.openG2PEnabled ? 'LIVE' : 'DEMO_MODE',
       syncStatus: farmLog.syncStatus,
       errorMessage: farmLog.errorMessage,
+      requestPayload: farmLog.requestPayload,
+      responsePayload: farmLog.responsePayload,
     });
 
     // 3. Find linked crop
@@ -532,13 +615,46 @@ export async function syncFullDemoFlow() {
     if (crop) {
       const cropLog = await syncCropToOpenG2P(crop._id);
       steps.push({
-        step: 'Sync crop to OpenG2P',
+        step: 'Crop → OpenG2P Agriculture Activity Extension',
         entityCode: crop.cropCode,
         platform: 'OPENG2P',
+        targetModel: cropLog.targetModel || 'g2p.agriculture.crop',
+        syncMode: config.openG2PEnabled ? 'LIVE' : 'DEMO_MODE',
         syncStatus: cropLog.syncStatus,
         errorMessage: cropLog.errorMessage,
+        requestPayload: cropLog.requestPayload,
+        responsePayload: cropLog.responsePayload,
+      });
+    } else {
+      steps.push({
+        step: 'Crop → OpenG2P Agriculture Activity Extension',
+        entityCode: 'N/A',
+        platform: 'OPENG2P',
+        targetModel: 'g2p.agriculture.crop',
+        syncMode: config.openG2PEnabled ? 'LIVE' : 'DEMO_MODE',
+        syncStatus: 'DISABLED',
+        errorMessage: 'No crop found for the demo farm.',
       });
     }
+  } else {
+    steps.push({
+      step: 'Farm → OpenG2P Agriculture Registry Extension',
+      entityCode: 'N/A',
+      platform: 'OPENG2P',
+      targetModel: 'g2p.agriculture.farm',
+      syncMode: config.openG2PEnabled ? 'LIVE' : 'DEMO_MODE',
+      syncStatus: 'DISABLED',
+      errorMessage: 'No farm found for the demo farmer.',
+    });
+    steps.push({
+      step: 'Crop → OpenG2P Agriculture Activity Extension',
+      entityCode: 'N/A',
+      platform: 'OPENG2P',
+      targetModel: 'g2p.agriculture.crop',
+      syncMode: config.openG2PEnabled ? 'LIVE' : 'DEMO_MODE',
+      syncStatus: 'DISABLED',
+      errorMessage: 'No farm or crop found for the demo farmer.',
+    });
   }
 
   // 4. Find program enrollment
@@ -546,11 +662,15 @@ export async function syncFullDemoFlow() {
   if (enrollment) {
     const enrollmentLog = await syncEnrollmentToOpenG2P(enrollment._id);
     steps.push({
-      step: 'Sync enrollment to OpenG2P',
+      step: 'Enrollment → OpenG2P Program Enrollment',
       entityCode: enrollment.enrollmentCode,
       platform: 'OPENG2P',
+      targetModel: enrollmentLog.targetModel || config.openG2PEnrollmentModel,
+      syncMode: config.openG2PEnabled ? 'LIVE' : 'DEMO_MODE',
       syncStatus: enrollmentLog.syncStatus,
       errorMessage: enrollmentLog.errorMessage,
+      requestPayload: enrollmentLog.requestPayload,
+      responsePayload: enrollmentLog.responsePayload,
     });
 
     // 5. Find linked inventory reservation
@@ -558,13 +678,46 @@ export async function syncFullDemoFlow() {
     if (reservation) {
       const reservationLog = await syncReservationToOdoo(reservation._id);
       steps.push({
-        step: 'Sync inventory reservation to Odoo',
+        step: 'Reservation → Odoo Inventory Fulfilment',
         entityCode: reservation.reservationCode,
         platform: 'ODOO',
+        targetModel: reservationLog.targetModel || 'product.template',
+        syncMode: config.odooEnabled ? 'LIVE' : 'DEMO_MODE',
         syncStatus: reservationLog.syncStatus,
         errorMessage: reservationLog.errorMessage,
+        requestPayload: reservationLog.requestPayload,
+        responsePayload: reservationLog.responsePayload,
+      });
+    } else {
+      steps.push({
+        step: 'Reservation → Odoo Inventory Fulfilment',
+        entityCode: 'N/A',
+        platform: 'ODOO',
+        targetModel: 'product.template',
+        syncMode: config.odooEnabled ? 'LIVE' : 'DEMO_MODE',
+        syncStatus: 'DISABLED',
+        errorMessage: 'No reservation found for the program enrollment.',
       });
     }
+  } else {
+    steps.push({
+      step: 'Enrollment → OpenG2P Program Enrollment',
+      entityCode: 'N/A',
+      platform: 'OPENG2P',
+      targetModel: config.openG2PEnrollmentModel,
+      syncMode: config.openG2PEnabled ? 'LIVE' : 'DEMO_MODE',
+      syncStatus: 'DISABLED',
+      errorMessage: 'No enrollment found for the demo farmer.',
+    });
+    steps.push({
+      step: 'Reservation → Odoo Inventory Fulfilment',
+      entityCode: 'N/A',
+      platform: 'ODOO',
+      targetModel: 'product.template',
+      syncMode: config.odooEnabled ? 'LIVE' : 'DEMO_MODE',
+      syncStatus: 'DISABLED',
+      errorMessage: 'No enrollment or reservation found.',
+    });
   }
 
   // 6. Record WSO2 readiness simulation log
@@ -575,16 +728,20 @@ export async function syncFullDemoFlow() {
     platform: 'WSO2',
     targetModel: 'APIM',
     syncStatus: config.wso2Enabled ? 'SYNCED' : 'DEMO_MODE',
-    requestPayload: { gatewayContexts: ['/agriregistry360/registry', '/agriregistry360/program', '/agriregistry360/inventory'] },
+    requestPayload: { gatewayContexts: [config.wso2RegistryApiContext, config.wso2ProgramApiContext, config.wso2InventoryApiContext] },
     responsePayload: { status: 'Gateway Ready' },
   });
 
   steps.push({
-    step: 'APIs WSO2 Ready',
+    step: 'APIs → WSO2 Gateway Publishing Readiness',
     entityCode: 'API-GATEWAY',
     platform: 'WSO2',
+    targetModel: 'APIM',
+    syncMode: config.wso2Enabled ? 'LIVE' : 'DEMO_MODE',
     syncStatus: wso2Log.syncStatus,
     errorMessage: '',
+    requestPayload: wso2Log.requestPayload,
+    responsePayload: wso2Log.responsePayload,
   });
 
   return {
@@ -656,7 +813,7 @@ export async function checkWso2Connection() {
         enabled: true,
         status: 'CONNECTED',
         baseUrl: config.wso2GatewayBaseUrl,
-        message: 'Successfully reached WSO2 Gateway (Warning: Self-signed SSL certificate detected).',
+        message: 'WSO2 URL reached or configured, but local certificate may need browser trust.',
       };
     }
 

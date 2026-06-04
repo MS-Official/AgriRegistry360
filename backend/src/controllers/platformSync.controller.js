@@ -98,6 +98,8 @@ export async function getWso2GatewayStatus(req, res, next) {
         programApiContext: config.wso2ProgramApiContext,
         inventoryApiContext: config.wso2InventoryApiContext,
         gatewayBaseUrl: config.wso2GatewayBaseUrl,
+        publisherUrl: `${config.wso2ApimBaseUrl}/publisher`,
+        devPortalUrl: `${config.wso2ApimBaseUrl}/devportal`,
         publishingStatus: config.wso2Enabled ? 'PUBLISHED' : 'READY_FOR_WSO2_PUBLISHING',
       },
     });

@@ -183,7 +183,7 @@ describe('Platform Sync API', () => {
     assert.equal(syncResponse.body.data.mode, 'DEMO_MODE');
     assert.ok(syncResponse.body.data.steps.length > 0);
 
-    const farmerSyncStep = syncResponse.body.data.steps.find((s) => s.step === 'Sync farmer to Odoo');
+    const farmerSyncStep = syncResponse.body.data.steps.find((s) => s.step === 'Farmer → Odoo Contact/Partner');
     assert.ok(farmerSyncStep);
     assert.equal(farmerSyncStep.syncStatus, 'DEMO_MODE');
 

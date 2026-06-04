@@ -24,6 +24,8 @@ interface Wso2GatewayStatus {
   programApiContext: string;
   inventoryApiContext: string;
   gatewayBaseUrl: string;
+  publisherUrl?: string;
+  devPortalUrl?: string;
   publishingStatus: string;
 }
 
@@ -47,8 +49,12 @@ interface SyncStepResult {
   step: string;
   entityCode: string;
   platform: string;
+  targetModel?: string;
+  syncMode?: string;
   syncStatus: string;
   errorMessage?: string;
+  requestPayload?: any;
+  responsePayload?: any;
 }
 
 interface FullSyncResponse {
@@ -235,7 +241,7 @@ interface DemoReadiness {
         <div>
           <h2 style="margin-top: 0;">Execute Demonstration Sync</h2>
           <p style="color: var(--muted); max-width: 800px; margin-bottom: 0;">
-            Triggering the demo sync will gather the seeded Mohomad Ameen farmer registry records, farm layout, crops, subsidy eligibility, program enrollment, and Odoo reservation details, and sync them sequentially to Odoo and OpenG2P.
+            Triggering the demo sync will gather the seeded Mohamed Ameen farmer registry records, farm layout, crops, subsidy eligibility, program enrollment, and Odoo reservation details, and sync them sequentially to Odoo and OpenG2P.
           </p>
         </div>
         <button class="button" [disabled]="syncInProgress" (click)="triggerDemoSync()" style="min-height: 46px; font-weight: 700;">
@@ -243,29 +249,129 @@ interface DemoReadiness {
         </button>
       </div>
 
-      <!-- Sync Progress Step View -->
+      <!-- Enriched Sync Progress Step View -->
       <div *ngIf="stepResults.length > 0" class="step-progress-container">
-        <h4>Sync Results (Mode: {{ syncMode }})</h4>
+        <h3 style="margin-top: 0; margin-bottom: 14px;">Sync Results (Flow Mode: {{ syncMode }})</h3>
         <div class="step-list">
-          <div *ngFor="let step of stepResults" class="step-item">
-            <span class="step-indicator" [class.success]="step.syncStatus === 'SYNCED' || step.syncStatus === 'DEMO_MODE'" [class.failed]="step.syncStatus === 'FAILED'">
-              ✓
-            </span>
-            <div class="step-details">
-              <strong>{{ step.step }}</strong>
-              <span>Entity: {{ step.entityCode }} | Platform: {{ step.platform }}</span>
-              <span class="client-msg" *ngIf="step.syncStatus === 'SYNCED' || step.syncStatus === 'DEMO_MODE'">
-                {{ getClientFriendlySyncMsg(step) }}
-              </span>
+          <div *ngFor="let step of stepResults; index as idx" style="background: var(--surface-strong); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 12px; padding: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <span class="step-indicator" [class.success]="step.syncStatus === 'SYNCED' || step.syncStatus === 'DEMO_MODE'" [class.failed]="step.syncStatus === 'FAILED'" [class.disabled]="step.syncStatus === 'DISABLED'" style="font-weight: bold; width: 24px; height: 24px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; color: white;">
+                  {{ step.syncStatus === 'FAILED' ? '✗' : (step.syncStatus === 'DISABLED' ? '—' : '✓') }}
+                </span>
+                <div>
+                  <strong style="font-size: 15px; display: block;">{{ step.step }}</strong>
+                  <span style="font-size: 12px; color: var(--muted);">
+                    Entity: <strong>{{ step.entityCode }}</strong> | 
+                    Platform: <strong>{{ step.platform }}</strong> | 
+                    Model: <code>{{ step.targetModel }}</code> | 
+                    Mode: <span class="badge" [class.verified]="step.syncMode === 'LIVE'" [class.pending]="step.syncMode === 'DEMO_MODE'">{{ step.syncMode }}</span>
+                  </span>
+                </div>
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span class="badge" [class.verified]="step.syncStatus === 'SYNCED'" [class.pending]="step.syncStatus === 'DEMO_MODE'" [class.rejected]="step.syncStatus === 'FAILED'" [class.disabled]="step.syncStatus === 'DISABLED'">
+                  {{ step.syncStatus }}
+                </span>
+                <button *ngIf="step.requestPayload || step.responsePayload" class="button secondary" style="min-height: 28px; padding: 2px 8px; font-size: 12px;" (click)="toggleStepPayload(idx)">
+                  {{ expandedStepIdx === idx ? 'Hide Payload' : 'View Payload' }}
+                </button>
+              </div>
             </div>
-            <div class="step-status">
-              <span class="badge" [class.verified]="step.syncStatus === 'SYNCED' || step.syncStatus === 'DEMO_MODE'" [class.rejected]="step.syncStatus === 'FAILED'">
-                {{ step.syncStatus }}
-              </span>
+
+            <!-- Warning or Error Message -->
+            <div *ngIf="step.errorMessage" style="margin-top: 10px; padding: 8px 12px; background: #fff8f8; border-left: 3px solid var(--danger); border-radius: 4px; font-size: 13px; color: var(--danger);">
+              <strong>Message:</strong> {{ step.errorMessage }}
+            </div>
+
+            <!-- Expandable Payload box -->
+            <div *ngIf="expandedStepIdx === idx" style="margin-top: 12px; padding: 12px; background: #111; border-radius: 6px; border: 1px solid var(--border);">
+              <div class="payload-box" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div>
+                  <strong style="color: #bbb; font-size: 12px; display: block; margin-bottom: 4px;">Request Payload:</strong>
+                  <pre style="margin: 0; color: #00ff00; font-family: monospace; font-size: 11px; overflow-x: auto; max-height: 200px;"><code>{{ step.requestPayload ? (step.requestPayload | json) : 'No request payload' }}</code></pre>
+                </div>
+                <div>
+                  <strong style="color: #bbb; font-size: 12px; display: block; margin-bottom: 4px;">Response Payload:</strong>
+                  <pre style="margin: 0; color: #00ff00; font-family: monospace; font-size: 11px; overflow-x: auto; max-height: 200px;"><code>{{ step.responsePayload ? (step.responsePayload | json) : 'No response payload' }}</code></pre>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
+    </section>
+
+    <!-- Live Instructions and Platform Demo Checklist Section -->
+    <section class="grid details-grid" style="grid-template-columns: 1fr 1.2fr; gap: 20px; margin-bottom: 24px;">
+      <!-- Live Platform Sync Instructions -->
+      <article class="panel" style="border-left: 4px solid var(--primary);">
+        <h2 style="margin-top: 0; margin-bottom: 12px; color: var(--primary-strong);">How to Use Live Mode</h2>
+        <p style="color: var(--muted); font-size: 14px; margin-bottom: 14px;">
+          Follow these sequential steps to connect AgriRegistry360 with your local Odoo ERP, OpenG2P, and WSO2 API Manager instances:
+        </p>
+        <ol style="color: var(--text); padding-left: 20px; line-height: 1.6; font-size: 13.5px; margin: 0;">
+          <li><strong>Start Platforms:</strong> Run Odoo/OpenG2P and WSO2 locally.</li>
+          <li><strong>Configure Environment:</strong> Copy <code>backend/.env.local.platform.example</code> to <code>backend/.env</code>.</li>
+          <li><strong>Enable Integration Flags:</strong> Set <code>ODOO_ENABLED=true</code>, <code>OPENG2P_ENABLED=true</code>, and <code>WSO2_ENABLED=true</code>.</li>
+          <li><strong>Restart Backend:</strong> Stop and start the backend service.</li>
+          <li><strong>Check Odoo Connection:</strong> Click the Odoo Connection check button above.</li>
+          <li><strong>Check OpenG2P Connection:</strong> Click the OpenG2P Connection check button above.</li>
+          <li><strong>Check WSO2 Connection:</strong> Click the WSO2 Connection check button above.</li>
+          <li><strong>Trigger Live Sync:</strong> Click the <em>Sync Full Demo Flow</em> button.</li>
+          <li><strong>Verify Locally:</strong> Open the respective platform UIs to see created partners and published APIs.</li>
+        </ol>
+      </article>
+
+      <!-- Live Platform Demo Checklist -->
+      <article class="panel" style="border-left: 4px solid var(--success);">
+        <h2 style="margin-top: 0; margin-bottom: 12px; color: var(--success);">Live Platform Demo Checklist</h2>
+        <p style="color: var(--muted); font-size: 14px; margin-bottom: 14px;">
+          Ensure the following local endpoints and services are active and reachable:
+        </p>
+        <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; font-size: 13.5px;">
+          <li style="display: flex; align-items: center; gap: 8px;">
+            <span style="color: var(--success); font-weight: bold;">✔</span>
+            MongoDB running
+          </li>
+          <li style="display: flex; align-items: center; gap: 8px;">
+            <span style="color: var(--success); font-weight: bold;">✔</span>
+            Backend reachable at <a href="http://localhost:5001" target="_blank">http://localhost:5001</a>
+          </li>
+          <li style="display: flex; align-items: center; gap: 8px;">
+            <span style="color: var(--success); font-weight: bold;">✔</span>
+            Frontend reachable at <a href="http://localhost:4200" target="_blank">http://localhost:4200</a>
+          </li>
+          <li style="display: flex; align-items: center; gap: 8px;">
+            <span style="color: var(--success); font-weight: bold;">✔</span>
+            Odoo UI reachable at <a [href]="connectionBaseUrl.odoo" target="_blank">{{ connectionBaseUrl.odoo }}</a>
+          </li>
+          <li style="display: flex; align-items: center; gap: 8px;">
+            <span style="color: var(--success); font-weight: bold;">✔</span>
+            OpenG2P UI reachable at <a [href]="connectionBaseUrl.openg2p" target="_blank">{{ connectionBaseUrl.openg2p }}</a>
+          </li>
+          <li style="display: flex; align-items: center; gap: 8px;">
+            <span style="color: var(--success); font-weight: bold;">✔</span>
+            WSO2 Publisher reachable at <a [href]="wso2Status?.publisherUrl || 'https://localhost:9443/publisher'" target="_blank">{{ wso2Status?.publisherUrl || 'https://localhost:9443/publisher' }}</a>
+          </li>
+          <li style="display: flex; align-items: center; gap: 8px;">
+            <span style="color: var(--success); font-weight: bold;">✔</span>
+            WSO2 DevPortal reachable at <a [href]="wso2Status?.devPortalUrl || 'https://localhost:9443/devportal'" target="_blank">{{ wso2Status?.devPortalUrl || 'https://localhost:9443/devportal' }}</a>
+          </li>
+          <li style="display: flex; align-items: center; gap: 8px;">
+            <span style="color: var(--success); font-weight: bold;">✔</span>
+            OpenAPI docs available at <a href="http://localhost:5001/api/docs" target="_blank">http://localhost:5001/api/docs</a>
+          </li>
+          <li style="display: flex; align-items: center; gap: 8px;">
+            <span style="color: var(--success); font-weight: bold;">✔</span>
+            OpenAPI JSON available at <a href="http://localhost:5001/api/docs.json" target="_blank">http://localhost:5001/api/docs.json</a>
+          </li>
+          <li style="display: flex; align-items: center; gap: 8px;">
+            <span style="color: var(--success); font-weight: bold;">✔</span>
+            API Catalog JSON available at <a href="http://localhost:5001/api/catalog" target="_blank">http://localhost:5001/api/catalog</a>
+          </li>
+        </ul>
+      </article>
     </section>
 
     <!-- WSO2 Gateway / Publishing Checklist Card -->
@@ -690,6 +796,7 @@ export class PlatformSyncComponent implements OnInit {
   syncMode = '';
   publishedSuccessMessage = '';
   expandedLogId: string | null = null;
+  expandedStepIdx: number | null = null;
   readiness: DemoReadiness | null = null;
 
   // Connection flags
@@ -709,6 +816,12 @@ export class PlatformSyncComponent implements OnInit {
     wso2: '',
   };
 
+  connectionBaseUrl = {
+    odoo: 'http://localhost:8069',
+    openg2p: 'http://localhost:8069',
+    wso2: 'https://localhost:8243',
+  };
+
   checkingConnection = {
     odoo: false,
     openg2p: false,
@@ -725,6 +838,10 @@ export class PlatformSyncComponent implements OnInit {
   ngOnInit(): void {
     this.loadAllData();
     this.loadReadiness();
+    // Proactively check connections on load to populate URLs and states
+    this.checkConnection('odoo');
+    this.checkConnection('openg2p');
+    this.checkConnection('wso2');
   }
 
   get globalMode(): string {
@@ -791,12 +908,15 @@ export class PlatformSyncComponent implements OnInit {
 
   checkConnection(platform: 'odoo' | 'openg2p' | 'wso2'): void {
     this.checkingConnection[platform] = true;
-    this.http.get<{ success: boolean; status: string; message: string }>(`${environment.apiUrl}/platform-sync/${platform}/connection-check`)
+    this.http.get<{ success: boolean; status: string; message: string; baseUrl?: string }>(`${environment.apiUrl}/platform-sync/${platform}/connection-check`)
       .subscribe({
         next: (res) => {
           this.checkingConnection[platform] = false;
           this.connectionStatus[platform] = res.status;
           this.connectionMessage[platform] = res.message;
+          if (res.baseUrl) {
+            this.connectionBaseUrl[platform] = res.baseUrl;
+          }
           this.loadReadiness();
         },
         error: (err) => {
@@ -811,6 +931,7 @@ export class PlatformSyncComponent implements OnInit {
   triggerDemoSync(): void {
     this.syncInProgress = true;
     this.stepResults = [];
+    this.expandedStepIdx = null;
     this.http.post<{ success: boolean; data: FullSyncResponse }>(`${environment.apiUrl}/platform-sync/full-demo`, {})
       .subscribe({
         next: (res) => {
@@ -852,26 +973,30 @@ export class PlatformSyncComponent implements OnInit {
     this.expandedLogId = this.expandedLogId === logId ? null : logId;
   }
 
+  toggleStepPayload(idx: number): void {
+    this.expandedStepIdx = this.expandedStepIdx === idx ? null : idx;
+  }
+
   getClientFriendlySyncMsg(step: SyncStepResult): string {
-    if (step.step === 'Sync farmer to Odoo') {
+    if (step.step.includes('Odoo Contact/Partner') || step.step === 'Sync farmer to Odoo') {
       return 'Farmer synced to Odoo contact/partner';
     }
-    if (step.step === 'Sync farmer to OpenG2P') {
+    if (step.step.includes('OpenG2P Registrant/Beneficiary') || step.step === 'Sync farmer to OpenG2P') {
       return 'Farmer mapped to OpenG2P registrant/beneficiary';
     }
-    if (step.step === 'Sync farm to OpenG2P') {
+    if (step.step.includes('OpenG2P Agriculture Registry Extension') || step.step === 'Sync farm to OpenG2P') {
       return 'Farm mapped to OpenG2P registrant record';
     }
-    if (step.step === 'Sync crop to OpenG2P') {
+    if (step.step.includes('OpenG2P Agriculture Activity Extension') || step.step === 'Sync crop to OpenG2P') {
       return 'Crop logged under OpenG2P registrant';
     }
-    if (step.step === 'Sync enrollment to OpenG2P') {
+    if (step.step.includes('OpenG2P Program Enrollment') || step.step === 'Sync enrollment to OpenG2P') {
       return 'Enrollment mapped to OpenG2P program enrollment';
     }
-    if (step.step === 'Sync inventory reservation to Odoo') {
+    if (step.step.includes('Odoo Inventory Fulfilment') || step.step === 'Sync inventory reservation to Odoo') {
       return 'Inventory reservation mapped to Odoo fulfilment';
     }
-    if (step.step === 'APIs WSO2 Ready') {
+    if (step.step.includes('WSO2 Gateway Publishing Readiness') || step.step === 'APIs WSO2 Ready') {
       return 'APIs ready for WSO2 Gateway publishing';
     }
     return '';

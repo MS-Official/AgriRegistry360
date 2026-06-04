@@ -7,7 +7,15 @@ import { seedDemoFarmer } from './seed/demoFarmer.seed.js';
 import { seedDemoInventory } from './seed/demoInventory.seed.js';
 
 async function startServer() {
-  await connectDb(config.mongodbUri);
+  try {
+    await connectDb(config.mongodbUri);
+  } catch (error) {
+    console.error('\n================================================================');
+    console.error('MongoDB is not running. Start MongoDB using: brew services start mongodb/brew/mongodb-community');
+    console.error('Error Details:', error.message);
+    console.error('================================================================\n');
+    process.exit(1);
+  }
 
   if (config.seedDemoFarmer) {
     await seedDemoFarmer();
@@ -25,7 +33,12 @@ async function startServer() {
 
   const app = createApp();
   app.listen(config.port, () => {
-    console.log(`AgriRegistry360 backend listening on port ${config.port}`);
+    console.log(`\n================================================================`);
+    console.log(`AgriRegistry360 backend running on port ${config.port}`);
+    console.log(`Odoo Integration: ${config.odooEnabled ? 'ENABLED' : 'DISABLED'}`);
+    console.log(`OpenG2P Integration: ${config.openG2PEnabled ? 'ENABLED' : 'DISABLED'}`);
+    console.log(`WSO2 Integration: ${config.wso2Enabled ? 'ENABLED' : 'DISABLED'}`);
+    console.log(`================================================================\n`);
   });
 }
 

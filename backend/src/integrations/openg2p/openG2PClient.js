@@ -124,6 +124,49 @@ export const openG2PClient = {
   },
 
   /**
+   * Generic create record method.
+   */
+  async createRecord(model, values) {
+    if (!config.openG2PEnabled) {
+      return Math.floor(Math.random() * 10000) + 1; // Random ID for demo mode
+    }
+
+    const uid = await this.authenticate();
+    return await callOpenG2PRpc('object', 'execute_kw', [
+      config.openG2PDb,
+      uid,
+      config.openG2PPassword,
+      model,
+      'create',
+      [values],
+    ]);
+  },
+
+  /**
+   * Check if a specific Odoo/OpenG2P model schema exists in the system database.
+   */
+  async checkModelExists(model) {
+    if (!config.openG2PEnabled) {
+      return false;
+    }
+    try {
+      const uid = await this.authenticate();
+      if (!uid) return false;
+      const count = await callOpenG2PRpc('object', 'execute_kw', [
+        config.openG2PDb,
+        uid,
+        config.openG2PPassword,
+        'ir.model',
+        'search_count',
+        [[['model', '=', model]]],
+      ]);
+      return count > 0;
+    } catch (error) {
+      return false;
+    }
+  },
+
+  /**
    * Check connection to OpenG2P database by trying to authenticate.
    */
   async checkConnection() {
@@ -131,6 +174,7 @@ export const openG2PClient = {
       return {
         enabled: false,
         status: 'DISABLED',
+        baseUrl: config.openG2PUrl,
         message: 'OpenG2P integration is disabled in configuration',
       };
     }
@@ -147,12 +191,14 @@ export const openG2PClient = {
         return {
           enabled: true,
           status: 'CONNECTED',
+          baseUrl: config.openG2PUrl,
           message: 'Connection successful. Authenticated with OpenG2P database.',
         };
       } else {
         return {
           enabled: true,
           status: 'FAILED',
+          baseUrl: config.openG2PUrl,
           message: 'Authentication failed: Invalid credentials or database name.',
         };
       }
@@ -160,6 +206,7 @@ export const openG2PClient = {
       return {
         enabled: true,
         status: 'FAILED',
+        baseUrl: config.openG2PUrl,
         message: error.message,
       };
     }
