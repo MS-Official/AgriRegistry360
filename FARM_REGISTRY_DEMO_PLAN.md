@@ -64,7 +64,12 @@ WSO2 API Manager Exposure
 | GET | `/api/farmers/:farmerId/crops` | Implemented in Crop Registry scope |
 | PUT | `/api/crops/:id` | Implemented in Crop Registry scope |
 | PATCH | `/api/crops/:id/verify` | Implemented in Crop Registry scope |
-| POST | `/api/eligibility/check` | Future module |
+| POST | `/api/eligibility/check` | Implemented in Eligibility Check scope |
+| GET | `/api/eligibility` | Implemented in Eligibility Check scope |
+| GET | `/api/eligibility/:id` | Implemented in Eligibility Check scope |
+| GET | `/api/farmers/:farmerId/eligibility` | Implemented in Eligibility Check scope |
+| GET | `/api/farms/:farmId/eligibility` | Implemented in Eligibility Check scope |
+| GET | `/api/crops/:cropId/eligibility` | Implemented in Eligibility Check scope |
 | POST | `/api/programs/enroll` | Future module |
 | POST | `/api/odoo/inventory/reserve` | Future integration |
 | GET | `/api/reports/farm-registry-summary` | Future module |
@@ -102,7 +107,7 @@ WSO2 API Manager Exposure
 - Linked farms shown on Farmer Details
 - Demo farm seed data for Mohamed Ameen
 
-### Crop Registry: Current Module / In Progress
+### Crop Registry: Completed
 
 - Crop registration under an existing farm / land record
 - Crop list with search
@@ -113,9 +118,18 @@ WSO2 API Manager Exposure
 - Farmer Details crop summary
 - Demo crop seed data for Mohamed Ameen's demo farm
 
+### Eligibility Check: Current Module / In Progress
+
+- Fertilizer Subsidy Program 2026 rule evaluation
+- Farmer + Farm + Crop relationship validation
+- Eligibility result persistence
+- Rule results and failure reasons
+- Recommended fertilizer entitlement
+- Eligibility check form, list, and details screens
+- Eligibility summaries on Farmer, Farm, and Crop details
+
 ## Future Modules
 
-- Eligibility Check
 - Program Enrollment
 - Odoo Inventory Reservation / Distribution
 - WSO2 API Publishing

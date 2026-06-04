@@ -10,6 +10,12 @@ import {
 } from '../../crops/crop-labels';
 import { Crop } from '../../crops/crop.model';
 import { CropService } from '../../crops/crop.service';
+import {
+  eligibilityStatusClass,
+  eligibilityStatusLabel,
+} from '../../eligibility/eligibility-labels';
+import { Eligibility } from '../../eligibility/eligibility.model';
+import { EligibilityService } from '../../eligibility/eligibility.service';
 import { verificationStatusClass, verificationStatusLabel } from '../../farmers/farmer-labels';
 import {
   farmStatusLabel,
@@ -164,6 +170,40 @@ import { FarmService } from '../farm.service';
         </div>
       </section>
 
+      <section style="margin-top: 22px;">
+        <div class="page-title" style="margin-bottom: 12px;">
+          <div>
+            <h1 style="font-size: 20px;">Eligibility Summary</h1>
+            <p>Latest eligibility outcome for this farm or land record.</p>
+          </div>
+          <a class="button secondary" routerLink="/eligibility/check">Run Eligibility Check</a>
+        </div>
+
+        <div class="grid details-grid">
+          <div class="detail-item">
+            <div class="detail-label">Total Eligibility Checks</div>
+            <div class="detail-value">{{ eligibilityChecks.length }}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Latest Eligibility Status</div>
+            <div class="detail-value">
+              <span *ngIf="latestEligibility" class="badge" [ngClass]="eligibilityStatusClass(latestEligibility.eligibilityStatus)">
+                {{ eligibilityStatusLabel(latestEligibility.eligibilityStatus) }}
+              </span>
+              <span *ngIf="!latestEligibility">-</span>
+            </div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Latest Program</div>
+            <div class="detail-value">{{ latestEligibility?.programName || '-' }}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Latest Entitlement</div>
+            <div class="detail-value">{{ latestEligibility?.recommendedEntitlement || '-' }}</div>
+          </div>
+        </div>
+      </section>
+
       <div class="grid placeholder-grid">
         <div class="placeholder">
           <strong>Registered Crops</strong>
@@ -188,6 +228,7 @@ import { FarmService } from '../farm.service';
 export class FarmDetailsComponent implements OnInit {
   farm?: Farm;
   linkedCrops: Crop[] = [];
+  eligibilityChecks: Eligibility[] = [];
   errorMessage = '';
 
   readonly ownershipTypeLabel = ownershipTypeLabel;
@@ -202,12 +243,19 @@ export class FarmDetailsComponent implements OnInit {
   readonly cultivationAreaUnitLabel = cultivationAreaUnitLabel;
   readonly expectedYieldUnitLabel = expectedYieldUnitLabel;
   readonly cropStatusLabel = cropStatusLabel;
+  readonly eligibilityStatusLabel = eligibilityStatusLabel;
+  readonly eligibilityStatusClass = eligibilityStatusClass;
 
   constructor(
     private readonly route: ActivatedRoute,
     private readonly farmService: FarmService,
-    private readonly cropService: CropService
+    private readonly cropService: CropService,
+    private readonly eligibilityService: EligibilityService
   ) {}
+
+  get latestEligibility(): Eligibility | undefined {
+    return this.eligibilityChecks[0];
+  }
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
@@ -221,6 +269,7 @@ export class FarmDetailsComponent implements OnInit {
       next: (farm) => {
         this.farm = farm;
         this.loadLinkedCrops(farm._id);
+        this.loadEligibilityChecks(farm._id);
       },
       error: (error) => {
         this.errorMessage = error.error?.message || 'Unable to load farm/land details.';
@@ -235,6 +284,17 @@ export class FarmDetailsComponent implements OnInit {
       },
       error: (error) => {
         this.errorMessage = error.error?.message || 'Unable to load linked crops.';
+      },
+    });
+  }
+
+  private loadEligibilityChecks(farmId: string): void {
+    this.eligibilityService.getEligibilityByFarmId(farmId).subscribe({
+      next: (eligibilityChecks) => {
+        this.eligibilityChecks = eligibilityChecks;
+      },
+      error: (error) => {
+        this.errorMessage = error.error?.message || 'Unable to load eligibility checks.';
       },
     });
   }

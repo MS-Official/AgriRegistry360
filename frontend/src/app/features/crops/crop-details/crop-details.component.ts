@@ -1,6 +1,12 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import {
+  eligibilityStatusClass,
+  eligibilityStatusLabel,
+} from '../../eligibility/eligibility-labels';
+import { Eligibility } from '../../eligibility/eligibility.model';
+import { EligibilityService } from '../../eligibility/eligibility.service';
 import { verificationStatusClass, verificationStatusLabel } from '../../farmers/farmer-labels';
 import {
   cropStatusLabel,
@@ -103,6 +109,40 @@ import { CropService } from '../crop.service';
         </div>
       </div>
 
+      <section style="margin-top: 22px;">
+        <div class="page-title" style="margin-bottom: 12px;">
+          <div>
+            <h1 style="font-size: 20px;">Eligibility Summary</h1>
+            <p>Latest eligibility outcome for this crop.</p>
+          </div>
+          <a class="button secondary" routerLink="/eligibility/check">Run Eligibility Check</a>
+        </div>
+
+        <div class="grid details-grid">
+          <div class="detail-item">
+            <div class="detail-label">Total Eligibility Checks</div>
+            <div class="detail-value">{{ eligibilityChecks.length }}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Latest Eligibility Status</div>
+            <div class="detail-value">
+              <span *ngIf="latestEligibility" class="badge" [ngClass]="eligibilityStatusClass(latestEligibility.eligibilityStatus)">
+                {{ eligibilityStatusLabel(latestEligibility.eligibilityStatus) }}
+              </span>
+              <span *ngIf="!latestEligibility">-</span>
+            </div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Latest Program</div>
+            <div class="detail-value">{{ latestEligibility?.programName || '-' }}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Latest Entitlement</div>
+            <div class="detail-value">{{ latestEligibility?.recommendedEntitlement || '-' }}</div>
+          </div>
+        </div>
+      </section>
+
       <div class="grid placeholder-grid">
         <div class="placeholder">
           <strong>Eligibility Status</strong>
@@ -130,6 +170,7 @@ import { CropService } from '../crop.service';
 })
 export class CropDetailsComponent implements OnInit {
   crop?: Crop;
+  eligibilityChecks: Eligibility[] = [];
   errorMessage = '';
 
   readonly cropTypeLabel = cropTypeLabel;
@@ -139,11 +180,18 @@ export class CropDetailsComponent implements OnInit {
   readonly cropStatusLabel = cropStatusLabel;
   readonly verificationStatusLabel = verificationStatusLabel;
   readonly verificationStatusClass = verificationStatusClass;
+  readonly eligibilityStatusLabel = eligibilityStatusLabel;
+  readonly eligibilityStatusClass = eligibilityStatusClass;
 
   constructor(
     private readonly route: ActivatedRoute,
-    private readonly cropService: CropService
+    private readonly cropService: CropService,
+    private readonly eligibilityService: EligibilityService
   ) {}
+
+  get latestEligibility(): Eligibility | undefined {
+    return this.eligibilityChecks[0];
+  }
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
@@ -156,11 +204,22 @@ export class CropDetailsComponent implements OnInit {
     this.cropService.getCropById(id).subscribe({
       next: (crop) => {
         this.crop = crop;
+        this.loadEligibilityChecks(crop._id);
       },
       error: (error) => {
         this.errorMessage = error.error?.message || 'Unable to load crop details.';
       },
     });
   }
-}
 
+  private loadEligibilityChecks(cropId: string): void {
+    this.eligibilityService.getEligibilityByCropId(cropId).subscribe({
+      next: (eligibilityChecks) => {
+        this.eligibilityChecks = eligibilityChecks;
+      },
+      error: (error) => {
+        this.errorMessage = error.error?.message || 'Unable to load eligibility checks.';
+      },
+    });
+  }
+}

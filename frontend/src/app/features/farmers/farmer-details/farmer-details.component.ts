@@ -4,6 +4,12 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { cropTypeLabel } from '../../crops/crop-labels';
 import { Crop } from '../../crops/crop.model';
 import { CropService } from '../../crops/crop.service';
+import {
+  eligibilityStatusClass,
+  eligibilityStatusLabel,
+} from '../../eligibility/eligibility-labels';
+import { Eligibility } from '../../eligibility/eligibility.model';
+import { EligibilityService } from '../../eligibility/eligibility.service';
 import { FarmService } from '../../farms/farm.service';
 import { Farm } from '../../farms/farm.model';
 import { landSizeUnitLabel, ownershipTypeLabel } from '../../farms/farm-labels';
@@ -152,6 +158,40 @@ import {
         </div>
       </section>
 
+      <section style="margin-top: 22px;">
+        <div class="page-title" style="margin-bottom: 12px;">
+          <div>
+            <h1 style="font-size: 20px;">Eligibility Summary</h1>
+            <p>Latest eligibility outcome for this farmer.</p>
+          </div>
+          <a class="button secondary" routerLink="/eligibility/check">Run Eligibility Check</a>
+        </div>
+
+        <div class="grid details-grid">
+          <div class="detail-item">
+            <div class="detail-label">Total Eligibility Checks</div>
+            <div class="detail-value">{{ eligibilityChecks.length }}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Latest Eligibility Status</div>
+            <div class="detail-value">
+              <span *ngIf="latestEligibility" class="badge" [ngClass]="eligibilityStatusClass(latestEligibility.eligibilityStatus)">
+                {{ eligibilityStatusLabel(latestEligibility.eligibilityStatus) }}
+              </span>
+              <span *ngIf="!latestEligibility">-</span>
+            </div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Latest Program</div>
+            <div class="detail-value">{{ latestEligibility?.programName || '-' }}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Latest Entitlement</div>
+            <div class="detail-value">{{ latestEligibility?.recommendedEntitlement || '-' }}</div>
+          </div>
+        </div>
+      </section>
+
       <div class="grid placeholder-grid">
         <div class="placeholder">
           <strong>Linked Farms</strong>
@@ -181,6 +221,7 @@ export class FarmerDetailsComponent implements OnInit {
   farmer?: Farmer;
   linkedFarms: Farm[] = [];
   linkedCrops: Crop[] = [];
+  eligibilityChecks: Eligibility[] = [];
   errorMessage = '';
 
   readonly farmerTypeLabel = farmerTypeLabel;
@@ -188,12 +229,15 @@ export class FarmerDetailsComponent implements OnInit {
   readonly verificationStatusClass = verificationStatusClass;
   readonly ownershipTypeLabel = ownershipTypeLabel;
   readonly landSizeUnitLabel = landSizeUnitLabel;
+  readonly eligibilityStatusLabel = eligibilityStatusLabel;
+  readonly eligibilityStatusClass = eligibilityStatusClass;
 
   constructor(
     private readonly route: ActivatedRoute,
     private readonly farmerService: FarmerService,
     private readonly farmService: FarmService,
-    private readonly cropService: CropService
+    private readonly cropService: CropService,
+    private readonly eligibilityService: EligibilityService
   ) {}
 
   get cropTypeSummary(): string {
@@ -203,6 +247,10 @@ export class FarmerDetailsComponent implements OnInit {
 
   get pendingCropVerifications(): number {
     return this.linkedCrops.filter((crop) => crop.verificationStatus === 'PENDING_VERIFICATION').length;
+  }
+
+  get latestEligibility(): Eligibility | undefined {
+    return this.eligibilityChecks[0];
   }
 
   ngOnInit(): void {
@@ -218,6 +266,7 @@ export class FarmerDetailsComponent implements OnInit {
         this.farmer = farmer;
         this.loadLinkedFarms(farmer._id);
         this.loadLinkedCrops(farmer._id);
+        this.loadEligibilityChecks(farmer._id);
       },
       error: (error) => {
         this.errorMessage = error.error?.message || 'Unable to load farmer details.';
@@ -243,6 +292,17 @@ export class FarmerDetailsComponent implements OnInit {
       },
       error: (error) => {
         this.errorMessage = error.error?.message || 'Unable to load linked crops.';
+      },
+    });
+  }
+
+  private loadEligibilityChecks(farmerId: string): void {
+    this.eligibilityService.getEligibilityByFarmerId(farmerId).subscribe({
+      next: (eligibilityChecks) => {
+        this.eligibilityChecks = eligibilityChecks;
+      },
+      error: (error) => {
+        this.errorMessage = error.error?.message || 'Unable to load eligibility checks.';
       },
     });
   }

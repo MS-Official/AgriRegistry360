@@ -2,6 +2,9 @@ import { Routes } from '@angular/router';
 import { CropDetailsComponent } from './features/crops/crop-details/crop-details.component';
 import { CropListComponent } from './features/crops/crop-list/crop-list.component';
 import { CropRegistrationComponent } from './features/crops/crop-registration/crop-registration.component';
+import { EligibilityCheckComponent } from './features/eligibility/eligibility-check/eligibility-check.component';
+import { EligibilityDetailsComponent } from './features/eligibility/eligibility-details/eligibility-details.component';
+import { EligibilityListComponent } from './features/eligibility/eligibility-list/eligibility-list.component';
 import { FarmerDetailsComponent } from './features/farmers/farmer-details/farmer-details.component';
 import { FarmerListComponent } from './features/farmers/farmer-list/farmer-list.component';
 import { FarmerRegistrationComponent } from './features/farmers/farmer-registration/farmer-registration.component';
@@ -20,4 +23,7 @@ export const routes: Routes = [
   { path: 'crops', component: CropListComponent },
   { path: 'crops/register', component: CropRegistrationComponent },
   { path: 'crops/:id', component: CropDetailsComponent },
+  { path: 'eligibility', component: EligibilityListComponent },
+  { path: 'eligibility/check', component: EligibilityCheckComponent },
+  { path: 'eligibility/:id', component: EligibilityDetailsComponent },
 ];
