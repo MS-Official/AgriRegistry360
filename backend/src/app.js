@@ -7,11 +7,26 @@ import { eligibilityRouter } from './routes/eligibility.routes.js';
 import { farmRouter } from './routes/farm.routes.js';
 import { farmerRouter } from './routes/farmer.routes.js';
 
+const corsOptions = {
+  origin: config.corsOrigin,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+};
+
 export function createApp() {
   const app = express();
 
-  app.use(cors({ origin: config.corsOrigin }));
+  app.use(cors(corsOptions));
+  app.options('*', cors(corsOptions));
   app.use(express.json());
+
+  app.get('/api/health', (req, res) => {
+    res.json({
+      success: true,
+      message: 'AgriRegistry360 API is running',
+    });
+  });
 
   app.get('/health', (req, res) => {
     res.json({
