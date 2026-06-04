@@ -8,7 +8,10 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
   template: `
     <div class="shell">
       <header class="topbar">
-        <div class="brand">AgriRegistry360</div>
+        <a class="brand" routerLink="/dashboard" aria-label="AgriRegistry360 dashboard">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <span>AgriRegistry360</span>
+        </a>
         <nav class="nav" aria-label="Main navigation">
           <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
           <a routerLink="/farmers/register" routerLinkActive="active">Register Farmer</a>

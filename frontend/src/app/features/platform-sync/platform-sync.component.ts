@@ -94,8 +94,8 @@ interface DemoReadiness {
     </section>
 
     <!-- Demo Readiness Banner -->
-    <article class="panel" style="margin-bottom: 24px; background: var(--surface-strong); border-color: var(--border);">
-      <h3 style="margin-top: 0; margin-bottom: 8px;">Demo Readiness Status</h3>
+    <article class="panel readiness-panel">
+      <h3>Demo Readiness Status</h3>
       <div class="readiness-grid">
         <div class="readiness-item">
           <span>Backend Server:</span>
@@ -134,13 +134,13 @@ interface DemoReadiness {
           </strong>
         </div>
       </div>
-      <p style="margin: 10px 0 0 0; font-size: 13px; color: var(--muted); italic: true;">
+      <p class="readiness-message">
         "{{ readiness?.clientDemoMessage }}"
       </p>
     </article>
 
     <!-- Platform Connection Status Cards -->
-    <section class="grid details-grid" style="margin-bottom: 24px; grid-template-columns: repeat(3, 1fr);">
+    <section class="grid platform-status-grid">
       <!-- Odoo ERP -->
       <article class="panel platform-card">
         <header class="card-header">
@@ -151,7 +151,7 @@ interface DemoReadiness {
         </header>
         <p class="description">Handles inventory, fertilizer and seed stock management, procurement, and reservation fulfilment.</p>
         <hr class="divider" />
-        <div class="stat-row"><strong>Base URL:</strong> <a href="http://localhost:8070" target="_blank">http://localhost:8070</a></div>
+        <div class="stat-row"><strong>Base URL:</strong> <a href="http://localhost:8069" target="_blank">http://localhost:8069</a></div>
         <div class="stat-row"><strong>Database:</strong> <span>agriregistry360</span></div>
         <div class="stat-row"><strong>Role:</strong> <span>Inventory, Fulfilment</span></div>
         <div class="stat-row"><strong>Synced:</strong> <span>{{ syncStatusData.odoo.synced + syncStatusData.odoo.demo }} records</span></div>
@@ -182,7 +182,7 @@ interface DemoReadiness {
         </header>
         <p class="description">Handles registrant registries, eligibility checks, program enrollments, and entitlement calculations.</p>
         <hr class="divider" />
-        <div class="stat-row"><strong>Base URL:</strong> <a href="http://localhost:8069" target="_blank">http://localhost:8069</a></div>
+        <div class="stat-row"><strong>Base URL:</strong> <a href="http://localhost:8070" target="_blank">http://localhost:8070</a></div>
         <div class="stat-row"><strong>Database:</strong> <span>openg2p</span></div>
         <div class="stat-row"><strong>Role:</strong> <span>Registry, G2P Welfare</span></div>
         <div class="stat-row"><strong>Synced:</strong> <span>{{ syncStatusData.openg2p.synced + syncStatusData.openg2p.demo }} records</span></div>
@@ -236,7 +236,7 @@ interface DemoReadiness {
     </section>
 
     <!-- Sync Action Panel -->
-    <section class="panel" style="margin-bottom: 24px;">
+    <section class="panel sync-panel">
       <div class="sync-action-wrapper">
         <div>
           <h2 style="margin-top: 0;">Execute Demonstration Sync</h2>
@@ -306,12 +306,12 @@ interface DemoReadiness {
     </section>
 
     <!-- OpenG2P UI Verification -->
-    <section class="panel" style="margin-bottom: 24px; border-left: 4px solid var(--primary);">
+    <section class="panel accent-panel">
       <h2 style="margin-top: 0; margin-bottom: 12px;">OpenG2P UI Verification</h2>
       <p style="color: var(--muted); font-size: 14px; margin-bottom: 12px;">
         These records prove that AgriRegistry360 data has been pushed into the OpenG2P-compatible platform.
       </p>
-      <div class="grid details-grid" style="grid-template-columns: 1fr 2fr; gap: 16px;">
+      <div class="grid verification-grid">
         <div class="detail-item">
           <div class="detail-label">Open OpenG2P UI</div>
           <div class="detail-value"><a href="http://localhost:8070" target="_blank">http://localhost:8070</a></div>
@@ -330,9 +330,9 @@ interface DemoReadiness {
     </section>
 
     <!-- Live Instructions and Platform Demo Checklist Section -->
-    <section class="grid details-grid" style="grid-template-columns: 1fr 1.2fr; gap: 20px; margin-bottom: 24px;">
+    <section class="grid platform-two-column">
       <!-- Live Platform Sync Instructions -->
-      <article class="panel" style="border-left: 4px solid var(--primary);">
+      <article class="panel accent-panel">
         <h2 style="margin-top: 0; margin-bottom: 12px; color: var(--primary-strong);">How to Use Live Mode</h2>
         <p style="color: var(--muted); font-size: 14px; margin-bottom: 14px;">
           Follow these sequential steps to connect AgriRegistry360 with your local Odoo ERP, OpenG2P, and WSO2 API Manager instances:
@@ -351,7 +351,7 @@ interface DemoReadiness {
       </article>
 
       <!-- Live Platform Demo Checklist -->
-      <article class="panel" style="border-left: 4px solid var(--success);">
+      <article class="panel success-panel">
         <h2 style="margin-top: 0; margin-bottom: 12px; color: var(--success);">Live Platform Demo Checklist</h2>
         <p style="color: var(--muted); font-size: 14px; margin-bottom: 14px;">
           Ensure the following local endpoints and services are active and reachable:
@@ -402,7 +402,7 @@ interface DemoReadiness {
     </section>
 
     <!-- WSO2 Gateway / Publishing Checklist Card -->
-    <section class="grid details-grid" style="grid-template-columns: 2fr 1.5fr; gap: 20px; margin-bottom: 24px;">
+    <section class="grid platform-two-column wide-left">
       <!-- WSO2 Gateway Details -->
       <article class="panel" *ngIf="wso2Status">
         <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
@@ -486,9 +486,9 @@ interface DemoReadiness {
     </section>
 
     <!-- Quick Links & Resources -->
-    <section class="panel" style="margin-bottom: 24px;">
+    <section class="panel quick-links-panel">
       <h2 style="margin-top: 0; margin-bottom: 12px;">Integration Quick Links & Resources</h2>
-      <div class="grid" style="grid-template-columns: repeat(4, 1fr); gap: 12px;">
+      <div class="grid quick-link-grid">
         <a class="button secondary link-card" href="http://localhost:5001/api/docs" target="_blank">
           <strong>Open Swagger API Docs</strong>
           <span>http://localhost:5001/api/docs</span>
@@ -609,9 +609,55 @@ interface DemoReadiness {
       .platform-card {
         display: flex;
         flex-direction: column;
-        justify-content: space-between;
+        height: 100%;
+      }
+      .readiness-panel,
+      .platform-status-grid,
+      .sync-panel,
+      .accent-panel,
+      .success-panel,
+      .platform-two-column,
+      .quick-links-panel {
+        margin-bottom: 24px;
+      }
+      .readiness-panel {
+        background: var(--surface-strong);
+        border-color: #cfe5c8;
+      }
+      .readiness-panel h3 {
+        margin: 0 0 12px;
+      }
+      .readiness-message {
+        color: var(--muted);
+        font-size: 13px;
+        margin: 12px 0 0;
+      }
+      .platform-status-grid {
+        align-items: stretch;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      }
+      .platform-two-column {
+        align-items: stretch;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      }
+      .platform-two-column.wide-left {
+        grid-template-columns: minmax(0, 1.2fr) minmax(340px, 0.8fr);
+      }
+      .verification-grid {
+        grid-template-columns: minmax(240px, 0.7fr) minmax(0, 1.6fr);
+      }
+      .quick-link-grid {
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 12px;
+      }
+      .accent-panel {
+        border-left: 4px solid var(--primary);
+      }
+      .success-panel {
+        border-left: 4px solid var(--success);
       }
       .card-header {
+        gap: 12px;
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -624,9 +670,8 @@ interface DemoReadiness {
       .description {
         color: var(--muted);
         font-size: 14px;
-        line-height: 1.4;
+        line-height: 1.5;
         margin: 0 0 16px 0;
-        flex-grow: 1;
       }
       .divider {
         border: 0;
@@ -635,9 +680,15 @@ interface DemoReadiness {
       }
       .stat-row {
         display: flex;
+        gap: 12px;
         justify-content: space-between;
         font-size: 13px;
         margin-bottom: 8px;
+      }
+      .stat-row span,
+      .stat-row a {
+        overflow-wrap: anywhere;
+        text-align: right;
       }
       .stat-row strong {
         color: var(--muted);
@@ -656,23 +707,10 @@ interface DemoReadiness {
         border-top: 1px solid var(--border);
         padding-top: 20px;
       }
-      .step-progress-container h4 {
-        margin-top: 0;
-        margin-bottom: 14px;
-      }
       .step-list {
         display: flex;
         flex-direction: column;
         gap: 10px;
-      }
-      .step-item {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        background: var(--surface-strong);
-        border: 1px solid var(--border);
-        border-radius: 6px;
-        padding: 10px 14px;
       }
       .step-indicator {
         display: flex;
@@ -690,34 +728,17 @@ interface DemoReadiness {
       .step-indicator.failed {
         background: var(--danger);
       }
-      .step-details {
-        flex-grow: 1;
-        display: flex;
-        flex-direction: column;
-      }
-      .step-details strong {
-        font-size: 14px;
-      }
-      .step-details span {
-        font-size: 12px;
-        color: var(--muted);
-      }
-      .client-msg {
-        color: var(--success) !important;
-        font-weight: bold;
-        margin-top: 3px;
-      }
       .connection-checker {
-        margin-top: 14px;
+        margin-top: auto;
         border-top: 1px dashed var(--border);
         padding-top: 12px;
       }
       .check-result-badge {
         font-size: 12px;
         font-weight: bold;
-        border-radius: 4px;
+        border-radius: 999px;
         text-align: center;
-        padding: 4px;
+        padding: 6px 8px;
         margin-top: 6px;
       }
       .check-result-badge.connected {
@@ -759,10 +780,18 @@ interface DemoReadiness {
       }
       .checklist-items li {
         display: flex;
-        align-items: center;
-        gap: 8px;
-        margin-bottom: 8px;
+        align-items: flex-start;
+        background: var(--surface-soft);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        gap: 10px;
+        margin-bottom: 10px;
+        min-height: 42px;
+        padding: 10px;
         font-size: 14px;
+      }
+      .checklist-items input {
+        margin-top: 4px;
       }
       .link-card {
         display: flex;
@@ -770,8 +799,8 @@ interface DemoReadiness {
         align-items: flex-start;
         justify-content: center;
         text-align: left;
-        padding: 10px;
-        height: 70px;
+        padding: 12px;
+        min-height: 78px;
       }
       .link-card strong {
         font-size: 13px;
@@ -787,7 +816,7 @@ interface DemoReadiness {
       }
       .readiness-grid {
         display: grid;
-        grid-template-columns: repeat(6, 1fr);
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
         gap: 12px;
       }
       .readiness-item {
@@ -796,7 +825,9 @@ interface DemoReadiness {
         background: var(--surface);
         border: 1px solid var(--border);
         border-radius: 6px;
-        padding: 8px;
+        min-height: 72px;
+        justify-content: center;
+        padding: 10px;
         text-align: center;
         font-size: 12px;
       }
@@ -817,11 +848,14 @@ interface DemoReadiness {
         padding: 4px 8px;
       }
       @media (max-width: 980px) {
-        .readiness-grid {
-          grid-template-columns: repeat(3, 1fr);
+        .platform-two-column,
+        .platform-two-column.wide-left,
+        .verification-grid {
+          grid-template-columns: 1fr;
         }
-        .details-grid {
-          grid-template-columns: 1fr !important;
+        .sync-action-wrapper {
+          align-items: flex-start;
+          flex-direction: column;
         }
         .payload-box {
           grid-template-columns: 1fr;

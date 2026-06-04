@@ -57,16 +57,16 @@ interface ExternalLink {
     </section>
 
     <!-- Platform Sync Ribbon -->
-    <div *ngIf="readiness" class="panel" style="margin-bottom: 20px; background: var(--surface-strong); border-color: var(--border); padding: 12px 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+    <div *ngIf="readiness" class="panel platform-ribbon">
       <div>
-        <strong style="color: var(--primary-strong);">Platform Connectivity:</strong>
-        <span style="margin-left: 10px; font-size: 13.5px; color: var(--muted);">
+        <strong>Platform Connectivity:</strong>
+        <span>
           Odoo ERP: <strong [style.color]="getReadinessColor(readiness.odoo)">{{ readiness.odoo }}</strong> | 
           OpenG2P: <strong [style.color]="getReadinessColor(readiness.openG2P)">{{ readiness.openG2P }}</strong> | 
           WSO2 Gateway: <strong [style.color]="getReadinessColor(readiness.wso2)">{{ readiness.wso2 }}</strong>
         </span>
       </div>
-      <a class="inline-link" routerLink="/platform-sync" style="font-size: 13px; font-weight: bold; text-decoration: none;">Manage Platforms ➔</a>
+      <a class="inline-link" routerLink="/platform-sync">Manage Platforms</a>
     </div>
 
     <div *ngIf="errorMessage" class="message error">{{ errorMessage }}</div>
@@ -176,19 +176,45 @@ interface ExternalLink {
   styles: [
     `
       .section {
-        margin-top: 24px;
+        margin-top: 28px;
       }
 
       .section h2 {
-        font-size: 22px;
+        font-size: 21px;
         margin: 0 0 14px;
       }
 
       .summary-grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      }
+
+      .platform-ribbon {
+        align-items: center;
+        background: var(--surface-strong);
+        border-color: #cfe5c8;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        justify-content: space-between;
+        margin-bottom: 22px;
+        padding: 14px 18px;
+      }
+
+      .platform-ribbon strong:first-child {
+        color: var(--primary-strong);
+      }
+
+      .platform-ribbon span {
+        color: var(--muted);
+        display: inline-block;
+        font-size: 13.5px;
+        margin-left: 10px;
       }
 
       .metric-card {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
         min-height: 132px;
       }
 
@@ -212,13 +238,14 @@ interface ExternalLink {
       }
 
       .workflow-grid {
-        grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
       }
 
       .workflow-card {
         display: grid;
         gap: 14px;
         grid-template-columns: auto 1fr;
+        height: 100%;
       }
 
       .workflow-card h3,
@@ -252,7 +279,12 @@ interface ExternalLink {
       }
 
       .platform-grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        align-items: stretch;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      }
+
+      .platform-grid .panel {
+        height: 100%;
       }
 
       ul {
@@ -277,12 +309,14 @@ interface ExternalLink {
       }
 
       .story-grid {
-        grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
       }
 
       .story-item {
-        border-top: 1px solid var(--border);
-        padding-top: 12px;
+        background: var(--surface-soft);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 12px;
       }
 
       .story-item span {
@@ -303,14 +337,14 @@ interface ExternalLink {
       }
 
       .checklist-grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
       }
 
       .check-item {
         align-items: center;
         background: var(--surface);
         border: 1px solid var(--border);
-        border-radius: 8px;
+        border-radius: var(--radius);
         display: flex;
         gap: 10px;
         min-height: 56px;
@@ -332,22 +366,14 @@ interface ExternalLink {
       }
 
       @media (max-width: 980px) {
-        .summary-grid,
-        .workflow-grid,
-        .platform-grid,
-        .story-grid,
-        .checklist-grid {
-          grid-template-columns: repeat(2, minmax(0, 1fr));
+        .platform-ribbon {
+          align-items: flex-start;
+          flex-direction: column;
         }
-      }
 
-      @media (max-width: 680px) {
-        .summary-grid,
-        .workflow-grid,
-        .platform-grid,
-        .story-grid,
-        .checklist-grid {
-          grid-template-columns: 1fr;
+        .platform-ribbon span {
+          display: block;
+          margin: 6px 0 0;
         }
       }
     `,
