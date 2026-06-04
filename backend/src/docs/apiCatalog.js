@@ -29,5 +29,14 @@ export const apiCatalog = [
     throttling: '300 requests/min for demo',
     status: 'READY_FOR_WSO2_PUBLISHING',
   },
+  {
+    name: 'AgriRegistry360 OpenG2P Mapping API',
+    description: 'OpenG2P concept mapping and integration preparation metadata',
+    context: '/agriregistry360/openg2p',
+    version: '1.0.0',
+    backendBasePath: 'http://localhost:5001/api',
+    security: 'OAuth2/JWT',
+    throttling: '300 requests/min for demo',
+    status: 'READY_FOR_OPENG2P_MAPPING',
+  },
 ];
-

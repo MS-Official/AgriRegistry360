@@ -93,6 +93,7 @@ WSO2 API Manager Exposure
 | GET | `/api/docs` | Implemented in WSO2 API Manager Publishing Preparation scope |
 | GET | `/api/docs.json` | Implemented in WSO2 API Manager Publishing Preparation scope |
 | GET | `/api/catalog` | Implemented in WSO2 API Manager Publishing Preparation scope |
+| GET | `/api/openg2p/mapping` | Implemented in OpenG2P Mapping Preparation scope |
 | GET | `/api/reports/farm-registry-summary` | Future module |
 
 ## Platform Responsibilities
@@ -170,7 +171,7 @@ WSO2 API Manager Exposure
 - Reservation stock accounting
 - Linked reservations shown on Enrollment Details
 
-### WSO2 API Manager Publishing Preparation: Current Module / In Progress
+### WSO2 API Manager Publishing Preparation: Completed
 
 - Swagger UI endpoint at `/api/docs`
 - OpenAPI JSON endpoint at `/api/docs.json`
@@ -179,6 +180,15 @@ WSO2 API Manager Exposure
 - WSO2 publishing guide
 - API catalog documentation
 - Angular WSO2 API Catalog page
+
+### OpenG2P Mapping Preparation: Current Module / In Progress
+
+- OpenG2P mapping guide
+- OpenG2P mapping metadata endpoint at `/api/openg2p/mapping`
+- Farmer, farm, crop, eligibility, enrollment, and fulfilment mapping
+- OpenG2P API catalog metadata
+- OpenG2P mapping page in Angular
+- Future integration phase plan and TODO placeholders
 
 ## Future Modules
 

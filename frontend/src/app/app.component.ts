@@ -24,6 +24,7 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
           <a routerLink="/inventory/reserve" routerLinkActive="active">Reserve Inventory</a>
           <a routerLink="/inventory/reservations" routerLinkActive="active">Reservation List</a>
           <a routerLink="/wso2/api-catalog" routerLinkActive="active">WSO2 API Catalog</a>
+          <a routerLink="/openg2p/mapping" routerLinkActive="active">OpenG2P Mapping</a>
         </nav>
       </header>
       <main class="content">

@@ -85,6 +85,7 @@ export const openApiSpec = {
     { name: 'Eligibility Check', description: 'Eligibility check APIs' },
     { name: 'Program Enrollment', description: 'Program enrollment APIs' },
     { name: 'Odoo Inventory Reservation', description: 'Simulated Odoo inventory APIs' },
+    { name: 'OpenG2P Mapping', description: 'OpenG2P mapping preparation APIs' },
   ],
   paths: {
     '/api/health': {
@@ -98,6 +99,15 @@ export const openApiSpec = {
       get: {
         tags: ['Health'],
         summary: 'Get WSO2-ready API catalog metadata',
+        responses: { 200: okResponse },
+      },
+    },
+    '/api/openg2p/mapping': {
+      get: {
+        tags: ['OpenG2P Mapping'],
+        summary: 'Get OpenG2P mapping metadata',
+        description:
+          'Returns AgriRegistry360 module mappings to OpenG2P registrant, beneficiary, program, eligibility, entitlement, enrollment, and fulfilment concepts.',
         responses: { 200: okResponse },
       },
     },
@@ -249,4 +259,3 @@ export const openApiSpec = {
     },
   },
 };
-
