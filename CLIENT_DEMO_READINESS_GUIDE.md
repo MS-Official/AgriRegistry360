@@ -159,7 +159,7 @@ WSO2 API Manager is the target API governance layer. In the demo, Swagger, OpenA
    - Open Odoo UI (`http://localhost:8069`), check the Contacts module for Mohamed Ameen, or review the seed products.
 
 9. **Open OpenG2P UI and show mapped registrant/program data or fallback mapping.**
-   - Open OpenG2P Odoo UI (`http://localhost:8069`), verify the registrant membership mapping or partner fallback logs.
+   - Open OpenG2P Odoo UI (`http://localhost:8070`), verify the registrant membership mapping or partner fallback logs.
 
 10. **Open WSO2 Publisher and show imported APIs.**
     - Open WSO2 Publisher UI (`https://localhost:9443/publisher`) to show imported and published API definitions.
@@ -179,6 +179,20 @@ WSO2 API Manager is the target API governance layer. In the demo, Swagger, OpenA
 
 To demonstrate the full stack within a containerized environment (Backend, Frontend, MongoDB, Odoo, OpenG2P, and WSO2 API Manager), refer to [DOCKER_DEMO_SETUP_GUIDE.md](file:///Users/shurafa28/Desktop/FarmRegistry/DOCKER_DEMO_SETUP_GUIDE.md).
 
+When creating the Odoo and OpenG2P databases through the browser UI, the login email used during database creation must match the backend Docker environment values.
+
+For this demo:
+
+| Platform | Database | Login Email | Password |
+| --- | --- | --- | --- |
+| Odoo ERP | `agriregistry360` | `admin@example.com` | `admin` |
+| OpenG2P | `openg2p` | `admin@example.com` | `admin` |
+
+After changing Docker credentials or environment values, recreate the backend container:
+```bash
+docker compose up -d --force-recreate backend
+```
+
 - **Docker Container Networking**: The backend container resolves platform hosts via internal network addresses:
   - `odoo` instead of `localhost`
   - `openg2p` instead of `localhost`
@@ -190,3 +204,11 @@ To demonstrate the full stack within a containerized environment (Backend, Front
   - OpenG2P placeholder: `http://localhost:8070`
   - WSO2 Publisher: `https://localhost:9443/publisher`
 
+Connection checks and sync commands:
+```bash
+curl http://localhost:5001/api/platform-sync/odoo/connection-check
+curl http://localhost:5001/api/platform-sync/openg2p/connection-check
+curl http://localhost:5001/api/platform-sync/wso2/connection-check
+curl -X POST http://localhost:5001/api/platform-sync/full-demo
+curl http://localhost:5001/api/platform-sync/logs
+```

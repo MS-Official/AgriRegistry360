@@ -1,5 +1,8 @@
 import { config } from '../../config/env.js';
 
+const DOCKER_AUTH_FAILURE_MESSAGE =
+  'Authentication failed. Check DB name, login email, and password. The Docker demo expects admin@example.com/admin unless changed during database creation.';
+
 /**
  * Perform a JSON-RPC request to the Odoo instance.
  */
@@ -163,15 +166,22 @@ export const odooClient = {
           enabled: true,
           status: 'FAILED',
           baseUrl: config.odooUrl,
-          message: 'Authentication failed: Invalid credentials or database name.',
+          message: DOCKER_AUTH_FAILURE_MESSAGE,
         };
       }
     } catch (error) {
+      const message = error.message?.toLowerCase() || '';
+      const isAuthFailure =
+        message.includes('authentication') ||
+        message.includes('access denied') ||
+        message.includes('login failed') ||
+        message.includes('invalid credentials');
+
       return {
         enabled: true,
         status: 'FAILED',
         baseUrl: config.odooUrl,
-        message: error.message,
+        message: isAuthFailure ? DOCKER_AUTH_FAILURE_MESSAGE : error.message,
       };
     }
   },

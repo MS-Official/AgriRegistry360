@@ -60,6 +60,20 @@ WSO2_PROGRAM_API_CONTEXT=/agriregistry360/program
 WSO2_INVENTORY_API_CONTEXT=/agriregistry360/inventory
 ```
 
+For Docker Compose, the backend container environment uses `ODOO_USERNAME=admin@example.com` and `OPENG2P_USERNAME=admin@example.com`. When creating the Odoo and OpenG2P databases through the browser UI, the login email used during database creation must match those backend Docker environment values.
+
+For this Docker demo:
+
+| Platform | Database | Login Email | Password |
+| --- | --- | --- | --- |
+| Odoo ERP | `agriregistry360` | `admin@example.com` | `admin` |
+| OpenG2P | `openg2p` | `admin@example.com` | `admin` |
+
+After changing Docker credentials or environment values, recreate the backend container:
+```bash
+docker compose up -d --force-recreate backend
+```
+
 ---
 
 ## Odoo Sync Mapping
@@ -191,9 +205,19 @@ To run the entire suite (AgriRegistry360 Backend, Frontend, MongoDB, Odoo, OpenG
 - **Local (Non-Docker) Environment**: Configured via `.env` pointing to local ports (`localhost:8069`, `localhost:8243`, etc.).
 - **Docker Compose Environment**: Configured via `.env.docker.example` / environment variables in `docker-compose.yml` resolving through internal container DNS names:
   - `ODOO_URL=http://odoo:8069`
+  - `ODOO_USERNAME=admin@example.com`
   - `OPENG2P_URL=http://openg2p:8069`
+  - `OPENG2P_USERNAME=admin@example.com`
   - `WSO2_APIM_BASE_URL=https://wso2-apim:9443`
   - `WSO2_GATEWAY_BASE_URL=https://wso2-apim:8243`
   
 *Note: In Docker Compose mode, browser URLs remain host-facing (e.g., Odoo UI is accessible at `http://localhost:8069` and OpenG2P UI is mapped to `http://localhost:8070` on the host machine).*
 
+### Docker Connection Check Commands
+```bash
+curl http://localhost:5001/api/platform-sync/odoo/connection-check
+curl http://localhost:5001/api/platform-sync/openg2p/connection-check
+curl http://localhost:5001/api/platform-sync/wso2/connection-check
+curl -X POST http://localhost:5001/api/platform-sync/full-demo
+curl http://localhost:5001/api/platform-sync/logs
+```

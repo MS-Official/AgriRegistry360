@@ -4,6 +4,24 @@ Use these `curl` commands in your host terminal to test the containerized backen
 
 ---
 
+## Docker Demo Database Credentials
+
+When creating the Odoo and OpenG2P databases through the browser UI, the login email used during database creation must match the backend Docker environment values.
+
+For this demo:
+
+| Platform | Database | Login Email | Password |
+| --- | --- | --- | --- |
+| Odoo ERP | `agriregistry360` | `admin@example.com` | `admin` |
+| OpenG2P | `openg2p` | `admin@example.com` | `admin` |
+
+After changing Docker credentials or environment values, recreate the backend container:
+```bash
+docker compose up -d --force-recreate backend
+```
+
+---
+
 ### 1. Verify Backend Container Health
 ```bash
 curl http://localhost:5001/api/health

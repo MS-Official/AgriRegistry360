@@ -109,6 +109,20 @@ If you prefer a fully automated local environment where MongoDB, Odoo, OpenG2P, 
 
 Refer to [DOCKER_DEMO_SETUP_GUIDE.md](file:///Users/shurafa28/Desktop/FarmRegistry/DOCKER_DEMO_SETUP_GUIDE.md) for full instructions.
 
+When creating the Odoo and OpenG2P databases through the browser UI for the Docker demo, the login email used during database creation must match the backend Docker environment values.
+
+For this demo:
+
+| Platform | Database | Login Email | Password |
+| --- | --- | --- | --- |
+| Odoo ERP | `agriregistry360` | `admin@example.com` | `admin` |
+| OpenG2P | `openg2p` | `admin@example.com` | `admin` |
+
+After changing Docker credentials or environment values, recreate the backend container:
+```bash
+docker compose up -d --force-recreate backend
+```
+
 ### Port Mappings and DNS Configuration
 - **Odoo ERP**: Mapped to host port `8069`. Internal service name is `odoo`.
 - **OpenG2P**: Mapped to host port `8070` to avoid conflicts on port `8069`. Internal service name is `openg2p`.
@@ -116,3 +130,12 @@ Refer to [DOCKER_DEMO_SETUP_GUIDE.md](file:///Users/shurafa28/Desktop/FarmRegist
 
 ### Backend Configuration
 Ensure you copy `.env.docker.example` to `.env` if you want to run the backend natively while talking to Docker containers, or let the Docker Compose environment inject it automatically during `docker compose up`.
+
+Docker connection checks and sync commands:
+```bash
+curl http://localhost:5001/api/platform-sync/odoo/connection-check
+curl http://localhost:5001/api/platform-sync/openg2p/connection-check
+curl http://localhost:5001/api/platform-sync/wso2/connection-check
+curl -X POST http://localhost:5001/api/platform-sync/full-demo
+curl http://localhost:5001/api/platform-sync/logs
+```

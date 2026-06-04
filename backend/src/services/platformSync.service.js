@@ -1,4 +1,6 @@
 import mongoose from 'mongoose';
+import http from 'node:http';
+import https from 'node:https';
 import { config } from '../config/env.js';
 import { odooClient } from '../integrations/odoo/odooClient.js';
 import { openG2PClient } from '../integrations/openg2p/openG2PClient.js';
@@ -235,11 +237,11 @@ export async function syncFarmToOpenG2P(farmId) {
   }
 
   const payload = {
-    name: farm.farmName,
+    name: `${farm.farmerName} Farm ${farm.farmCode}`,
     ref: farm.farmCode,
-    street: farm.location || '',
+    street: farm.gnDivision || '',
     city: farm.district || '',
-    comment: `Ownership: ${farm.ownershipType}, Size: ${farm.totalSize} ${farm.sizeUnit}, Farmer Ref: ${farm.farmerCode}`,
+    comment: `Ownership: ${farm.ownershipType}, Size: ${farm.landSize} ${farm.landSizeUnit}, Farmer Ref: ${farm.farmerCode}`,
   };
 
   const model = 'g2p.agriculture.farm';
@@ -311,9 +313,9 @@ export async function syncCropToOpenG2P(cropId) {
   }
 
   const payload = {
-    name: `${crop.cropType} (${crop.cropVariety})`,
+    name: `${crop.cropType} ${crop.season} ${crop.seasonYear}`,
     ref: crop.cropCode,
-    comment: `Season: ${crop.season}, Expected Yield: ${crop.expectedYield} ${crop.yieldUnit}, Farm Ref: ${crop.farmCode}`,
+    comment: `Season: ${crop.season}, Expected Yield: ${crop.expectedYield} ${crop.expectedYieldUnit}, Farm Ref: ${crop.farmCode}`,
   };
 
   const model = 'g2p.agriculture.crop';
@@ -779,56 +781,62 @@ export async function checkWso2Connection() {
     };
   }
 
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 4000);
+  const probeUrl = (url) =>
+    new Promise((resolve) => {
+      const parsed = new URL(url);
+      const client = parsed.protocol === 'https:' ? https : http;
+      const req = client.request(
+        parsed,
+        {
+          method: 'GET',
+          timeout: 4000,
+          rejectUnauthorized: false,
+        },
+        (res) => {
+          res.resume();
+          res.on('end', () => resolve({ reachable: true, statusCode: res.statusCode }));
+        }
+      );
 
-  try {
-    const res = await fetch(config.wso2GatewayBaseUrl, {
-      method: 'GET',
-      signal: controller.signal,
+      req.on('timeout', () => {
+        req.destroy(new Error('Connection check timed out: service took too long to respond.'));
+      });
+      req.on('error', (error) => resolve({ reachable: false, error }));
+      req.end();
     });
-    clearTimeout(timeoutId);
 
+  const gatewayCheck = await probeUrl(config.wso2GatewayBaseUrl);
+  if (gatewayCheck.reachable) {
     return {
       success: true,
       platform: 'WSO2',
       enabled: true,
       status: 'CONNECTED',
       baseUrl: config.wso2GatewayBaseUrl,
-      message: `Successfully connected to WSO2 Gateway (HTTP ${res.status}).`,
+      message: `Successfully reached WSO2 Gateway (HTTP ${gatewayCheck.statusCode}).`,
     };
-  } catch (error) {
-    clearTimeout(timeoutId);
+  }
 
-    const isTlsError =
-      error.code === 'DEPTH_ZERO_SELF_SIGNED_CERT' ||
-      error.message?.includes('self-signed') ||
-      error.message?.includes('certificate') ||
-      error.code?.includes('CERT');
-
-    if (isTlsError) {
-      return {
-        success: true,
-        platform: 'WSO2',
-        enabled: true,
-        status: 'CONNECTED',
-        baseUrl: config.wso2GatewayBaseUrl,
-        message: 'WSO2 URL reached or configured, but local certificate may need browser trust.',
-      };
-    }
-
-    const isTimeout = error.name === 'AbortError';
+  const apimCheck = await probeUrl(config.wso2ApimBaseUrl);
+  if (apimCheck.reachable) {
     return {
       success: true,
       platform: 'WSO2',
       enabled: true,
-      status: 'FAILED',
+      status: 'READY_FOR_PUBLISHING',
       baseUrl: config.wso2GatewayBaseUrl,
-      message: isTimeout
-        ? 'Connection check timed out: Gateway took too long to respond.'
-        : `Connection failed: ${error.message}`,
+      message: `WSO2 API Manager is reachable (HTTP ${apimCheck.statusCode}); gateway APIs may still need to be imported and published.`,
     };
   }
+
+  return {
+    success: true,
+    platform: 'WSO2',
+    enabled: true,
+    status: 'FAILED',
+    baseUrl: config.wso2GatewayBaseUrl,
+    message: `Connection failed: gateway ${gatewayCheck.error?.message || 'unreachable'}; API Manager ${apimCheck.error?.message || 'unreachable'}.`,
+  };
 }
 
 /**
@@ -857,7 +865,7 @@ export async function getDemoReadiness() {
   let wso2Status = 'DISABLED';
   if (config.wso2Enabled) {
     const check = await checkWso2Connection();
-    wso2Status = check.status === 'CONNECTED' ? 'PUBLISHED' : 'FAILED';
+    wso2Status = check.status === 'CONNECTED' ? 'PUBLISHED' : check.status;
   } else {
     wso2Status = 'READY_FOR_PUBLISHING';
   }
@@ -872,4 +880,3 @@ export async function getDemoReadiness() {
     clientDemoMessage: 'AgriRegistry360 can sync registry data to Odoo/OpenG2P and expose APIs through WSO2 API Manager.',
   };
 }
-

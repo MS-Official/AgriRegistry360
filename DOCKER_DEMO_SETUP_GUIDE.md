@@ -45,7 +45,38 @@ npm run docker:up
 ```
 This builds the custom backend and frontend Dockerfiles, downloads platform images, and spins them up.
 
-### 3.2 View Logs
+### 3.2 Create Odoo and OpenG2P Databases
+When creating the Odoo and OpenG2P databases through the browser UI, the login email used during database creation must match the backend Docker environment values.
+
+For this demo:
+
+| Platform | Database | Login Email | Password |
+| --- | --- | --- | --- |
+| Odoo ERP | `agriregistry360` | `admin@example.com` | `admin` |
+| OpenG2P | `openg2p` | `admin@example.com` | `admin` |
+
+The backend container uses these internal service URLs and credentials:
+```env
+ODOO_URL=http://odoo:8069
+ODOO_DB=agriregistry360
+ODOO_USERNAME=admin@example.com
+ODOO_PASSWORD=admin
+
+OPENG2P_URL=http://openg2p:8069
+OPENG2P_DB=openg2p
+OPENG2P_USERNAME=admin@example.com
+OPENG2P_PASSWORD=admin
+
+WSO2_APIM_BASE_URL=https://wso2-apim:9443
+WSO2_GATEWAY_BASE_URL=https://wso2-apim:8243
+```
+
+After changing Docker credentials or environment values, recreate the backend container:
+```bash
+docker compose up -d --force-recreate backend
+```
+
+### 3.3 View Logs
 To inspect logs across all containers:
 ```bash
 npm run docker:logs
@@ -55,7 +86,7 @@ To check logs for a specific service (e.g. backend):
 docker compose logs -f backend
 ```
 
-### 3.3 Stop/Teardown Everything
+### 3.4 Stop/Teardown Everything
 To stop all containers:
 ```bash
 npm run docker:down
@@ -79,6 +110,16 @@ npm run docker:clean
    - Open Odoo UI (`http://localhost:8069`) to see created contacts.
    - Open OpenG2P UI (`http://localhost:8070`) to review registrant fallbacks.
    - Open WSO2 Publisher (`https://localhost:9443/publisher`) to show imported catalog schemas.
+
+### API Verification Commands
+Run these from the host terminal:
+```bash
+curl http://localhost:5001/api/platform-sync/odoo/connection-check
+curl http://localhost:5001/api/platform-sync/openg2p/connection-check
+curl http://localhost:5001/api/platform-sync/wso2/connection-check
+curl -X POST http://localhost:5001/api/platform-sync/full-demo
+curl http://localhost:5001/api/platform-sync/logs
+```
 
 ---
 
