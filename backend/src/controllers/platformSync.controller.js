@@ -64,6 +64,15 @@ export async function syncEnrollmentToOpenG2P(req, res, next) {
   }
 }
 
+export async function syncEligibilityToOpenG2P(req, res, next) {
+  try {
+    const log = await platformSyncService.syncEligibilityToOpenG2P(req.params.eligibilityId);
+    res.json({ success: true, message: 'Eligibility OpenG2P sync completed', data: log });
+  } catch (error) {
+    next(error);
+  }
+}
+
 export async function syncReservationToOdoo(req, res, next) {
   try {
     const log = await platformSyncService.syncReservationToOdoo(req.params.reservationId);
@@ -164,6 +173,20 @@ export async function checkOpenG2pConnection(req, res, next) {
   }
 }
 
+export async function discoverOpenG2PModels(req, res, next) {
+  try {
+    const discovery = await platformSyncService.discoverOpenG2PModels();
+    res.json({
+      success: true,
+      platform: 'OPENG2P',
+      message: 'OpenG2P model discovery completed',
+      data: discovery,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
 export async function checkWso2Connection(req, res, next) {
   try {
     const check = await platformSyncService.checkWso2Connection();
@@ -192,4 +215,3 @@ export async function getDemoReadiness(req, res, next) {
     next(error);
   }
 }
-

@@ -208,7 +208,25 @@ Connection checks and sync commands:
 ```bash
 curl http://localhost:5001/api/platform-sync/odoo/connection-check
 curl http://localhost:5001/api/platform-sync/openg2p/connection-check
+curl http://localhost:5001/api/platform-sync/openg2p/models
 curl http://localhost:5001/api/platform-sync/wso2/connection-check
 curl -X POST http://localhost:5001/api/platform-sync/full-demo
 curl http://localhost:5001/api/platform-sync/logs
 ```
+
+## OpenG2P Fallback vs Real PBMS Model Mode
+
+Real OpenG2P PBMS models are used when they are installed in the OpenG2P/Odoo database and configured through the backend environment. In the local Docker demo, the OpenG2P container may not include every official PBMS agriculture model. When those models are missing, AgriRegistry360 writes visible fallback records into OpenG2P/Odoo Contacts so the client can verify the sync.
+
+This proves the integration pathway while keeping the demo operational. Production setup should install/configure official OpenG2P modules and update model environment variables.
+
+Client verification:
+- Open OpenG2P UI: `http://localhost:8070`
+- Go to **Contacts**
+- Search for `Mohamed Ameen`
+- Search for `FARM-LAND-0001`
+- Search for `CROP-0001`
+- Search for `ELIG`
+- Search for `ENROLL`
+
+These records prove that AgriRegistry360 data has been pushed into the OpenG2P-compatible platform.

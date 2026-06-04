@@ -11,7 +11,7 @@ export const ENTITY_TYPES = [
 
 export const PLATFORMS = ['ODOO', 'OPENG2P', 'WSO2'];
 
-export const SYNC_STATUSES = ['PENDING', 'SYNCED', 'FAILED', 'SKIPPED', 'DEMO_MODE'];
+export const SYNC_STATUSES = ['PENDING', 'SYNCED', 'FALLBACK_SYNCED', 'FAILED', 'SKIPPED', 'DEMO_MODE'];
 
 export const SYNC_DIRECTIONS = ['OUTBOUND', 'INBOUND'];
 

@@ -116,10 +116,26 @@ Run these from the host terminal:
 ```bash
 curl http://localhost:5001/api/platform-sync/odoo/connection-check
 curl http://localhost:5001/api/platform-sync/openg2p/connection-check
+curl http://localhost:5001/api/platform-sync/openg2p/models
 curl http://localhost:5001/api/platform-sync/wso2/connection-check
 curl -X POST http://localhost:5001/api/platform-sync/full-demo
 curl http://localhost:5001/api/platform-sync/logs
 ```
+
+### OpenG2P Fallback vs Real PBMS Model Mode
+
+The Docker OpenG2P service is an OpenG2P-compatible Odoo instance. If official PBMS/agriculture models are installed, AgriRegistry360 writes to those configured models. If they are not installed, AgriRegistry360 writes visible fallback records into OpenG2P/Odoo Contacts using `res.partner`.
+
+This fallback mode keeps the demo client-visible:
+- Farmer records appear as OpenG2P/Odoo contacts.
+- Farm, crop, eligibility, and enrollment records appear as searchable contacts with entity codes in `ref` and detailed AgriRegistry360 mapping notes in comments.
+- Sync logs use `FALLBACK_SYNCED` when data was actually written to the fallback model.
+- Production deployments should install/configure official OpenG2P PBMS modules and update the `OPENG2P_*_MODEL` variables.
+
+To verify fallback records in the UI:
+1. Open `http://localhost:8070`.
+2. Go to **Contacts**.
+3. Search for `Mohamed Ameen`, `FARM-LAND-0001`, `CROP-0001`, `ELIG`, or `ENROLL`.
 
 ---
 

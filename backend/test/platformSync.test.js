@@ -12,6 +12,8 @@ import { Eligibility } from '../src/models/eligibility.model.js';
 import { Enrollment } from '../src/models/enrollment.model.js';
 import { InventoryReservation } from '../src/models/inventoryReservation.model.js';
 import { PlatformSync } from '../src/models/platformSync.model.js';
+import { config } from '../src/config/env.js';
+import { openG2PClient } from '../src/integrations/openg2p/openG2PClient.js';
 
 let mongoServer;
 let app;
@@ -209,6 +211,85 @@ describe('Platform Sync API', () => {
     assert.equal(response.body.success, true);
     assert.equal(response.body.data.syncStatus, 'DEMO_MODE');
     assert.equal(response.body.data.entityCode, 'FARMER-0001');
+  });
+
+  it('returns OpenG2P configured model discovery when integration is disabled', async () => {
+    const response = await request(app).get('/api/platform-sync/openg2p/models').expect(200);
+
+    assert.equal(response.body.success, true);
+    assert.equal(response.body.platform, 'OPENG2P');
+    assert.equal(response.body.data.enabled, false);
+    assert.equal(response.body.data.fallbackModel, 'res.partner');
+    assert.ok(response.body.data.models.some((model) => model.modelName === 'g2p.agriculture.farm'));
+    assert.ok(response.body.data.models.some((model) => model.modelName === 'g2p.eligibility.check'));
+  });
+
+  it('syncs farm to OpenG2P visible fallback when PBMS agriculture model is unavailable', async () => {
+    const { farmDoc } = await seedDatabase();
+    const originalEnabled = config.openG2PEnabled;
+    const originalCheckModelExists = openG2PClient.checkModelExists;
+    const originalUpsert = openG2PClient.upsertVisibleFallbackRecord;
+
+    config.openG2PEnabled = true;
+    openG2PClient.checkModelExists = async (model) => model === 'res.partner';
+    openG2PClient.upsertVisibleFallbackRecord = async (values, fallbackModel) => ({
+      action: 'created',
+      id: 42,
+      model: fallbackModel,
+      values,
+      message: 'Created new visible OpenG2P fallback record.',
+    });
+
+    try {
+      const response = await request(app)
+        .post(`/api/platform-sync/farms/${farmDoc._id}/openg2p`)
+        .expect(200);
+
+      assert.equal(response.body.success, true);
+      assert.equal(response.body.data.syncStatus, 'FALLBACK_SYNCED');
+      assert.equal(response.body.data.targetModel, 'res.partner');
+      assert.equal(response.body.data.responsePayload.action, 'created');
+      assert.equal(response.body.data.requestPayload.ref, 'FARM-LAND-0001');
+      assert.match(response.body.data.requestPayload.name, /Mohamed Ameen Farm FARM-LAND-0001/);
+    } finally {
+      config.openG2PEnabled = originalEnabled;
+      openG2PClient.checkModelExists = originalCheckModelExists;
+      openG2PClient.upsertVisibleFallbackRecord = originalUpsert;
+    }
+  });
+
+  it('syncs eligibility to OpenG2P visible fallback when PBMS eligibility model is unavailable', async () => {
+    const { eligibilityDoc } = await seedDatabase();
+    const originalEnabled = config.openG2PEnabled;
+    const originalCheckModelExists = openG2PClient.checkModelExists;
+    const originalUpsert = openG2PClient.upsertVisibleFallbackRecord;
+
+    config.openG2PEnabled = true;
+    openG2PClient.checkModelExists = async (model) => model === 'res.partner';
+    openG2PClient.upsertVisibleFallbackRecord = async (values, fallbackModel) => ({
+      action: 'updated',
+      id: 77,
+      model: fallbackModel,
+      values,
+      message: 'Updated existing visible OpenG2P fallback record.',
+    });
+
+    try {
+      const response = await request(app)
+        .post(`/api/platform-sync/eligibility/${eligibilityDoc._id}/openg2p`)
+        .expect(200);
+
+      assert.equal(response.body.success, true);
+      assert.equal(response.body.data.syncStatus, 'FALLBACK_SYNCED');
+      assert.equal(response.body.data.targetModel, 'res.partner');
+      assert.equal(response.body.data.responsePayload.action, 'updated');
+      assert.equal(response.body.data.requestPayload.ref, 'ELIG-0001');
+      assert.match(response.body.data.requestPayload.name, /Fertilizer Subsidy Program 2026/);
+    } finally {
+      config.openG2PEnabled = originalEnabled;
+      openG2PClient.checkModelExists = originalCheckModelExists;
+      openG2PClient.upsertVisibleFallbackRecord = originalUpsert;
+    }
   });
 
   it('retrieves WSO2 gateway status', async () => {

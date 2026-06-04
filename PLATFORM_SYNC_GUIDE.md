@@ -123,6 +123,44 @@ docker compose up -d --force-recreate backend
   - `enrollmentCode` ➔ `membership_ref` (Unique membership identifier)
   - `enrollmentStatus` ➔ `state` (Status mapping)
 
+### OpenG2P Fallback vs Real PBMS Model Mode
+
+AgriRegistry360 dynamically checks whether the configured OpenG2P/PBMS models exist before writing farm, crop, eligibility, and enrollment records.
+
+- Real OpenG2P PBMS models are used when installed and configured through `OPENG2P_*_MODEL` environment variables.
+- If those models are missing, AgriRegistry360 writes visible fallback records into the OpenG2P/Odoo UI, currently using `res.partner`.
+- Fallback records use clear names, `ref` entity codes, and detailed comments so the client can verify that data was pushed into the OpenG2P-compatible platform.
+- This proves the integration pathway without requiring the local demo container to include every official PBMS agriculture module.
+- Production setup should install/configure official OpenG2P modules and update the model env variables.
+
+Model discovery endpoint:
+```bash
+curl http://localhost:5001/api/platform-sync/openg2p/models
+```
+
+Configured Docker model variables:
+```env
+OPENG2P_REGISTRANT_MODEL=res.partner
+OPENG2P_PROGRAM_MODEL=g2p.program
+OPENG2P_ENROLLMENT_MODEL=g2p.program.membership
+OPENG2P_FARM_MODEL=g2p.agriculture.farm
+OPENG2P_CROP_MODEL=g2p.agriculture.crop
+OPENG2P_ELIGIBILITY_MODEL=g2p.eligibility.check
+OPENG2P_FALLBACK_MODEL=res.partner
+```
+
+Fallback status meanings:
+- `SYNCED`: data was written to a detected configured OpenG2P model.
+- `FALLBACK_SYNCED`: data was written to a visible fallback record in OpenG2P/Odoo.
+- `DEMO_MODE`: OpenG2P integration is disabled.
+- `FAILED`: authentication, discovery, or write failed.
+
+OpenG2P UI verification:
+1. Open `http://localhost:8070`.
+2. Go to **Contacts**.
+3. Search for `Mohamed Ameen`, `FARM-LAND-0001`, `CROP-0001`, `ELIG`, or `ENROLL`.
+4. Open the matching records and review the `ref`, `name`, and internal notes/comments.
+
 ---
 
 ## WSO2 Gateway Readiness

@@ -3,6 +3,16 @@ import { config } from '../../config/env.js';
 const DOCKER_AUTH_FAILURE_MESSAGE =
   'Authentication failed. Check DB name, login email, and password. The Docker demo expects admin@example.com/admin unless changed during database creation.';
 
+const MODEL_DISCOVERY_TARGETS = [
+  { key: 'registrant', label: 'Registrant / beneficiary', configKey: 'openG2PRegistrantModel' },
+  { key: 'program', label: 'Program', configKey: 'openG2PProgramModel' },
+  { key: 'enrollment', label: 'Enrollment / membership', configKey: 'openG2PEnrollmentModel' },
+  { key: 'farm', label: 'Agriculture farm', configKey: 'openG2PFarmModel' },
+  { key: 'crop', label: 'Agriculture crop', configKey: 'openG2PCropModel' },
+  { key: 'eligibility', label: 'Eligibility check', configKey: 'openG2PEligibilityModel' },
+  { key: 'fallback', label: 'Visible fallback', configKey: 'openG2PFallbackModel' },
+];
+
 /**
  * Perform a JSON-RPC request to the OpenG2P instance.
  */
@@ -146,6 +156,79 @@ export const openG2PClient = {
   },
 
   /**
+   * Search and read records from OpenG2P/Odoo.
+   */
+  async searchRead(model, domain = [], fields = []) {
+    if (!config.openG2PEnabled) {
+      return [];
+    }
+
+    const uid = await this.authenticate();
+    if (!uid) {
+      throw new Error('Authentication failed');
+    }
+
+    return await callOpenG2PRpc('object', 'execute_kw', [
+      config.openG2PDb,
+      uid,
+      config.openG2PPassword,
+      model,
+      'search_read',
+      [domain],
+      { fields },
+    ]);
+  },
+
+  /**
+   * Update records in OpenG2P/Odoo.
+   */
+  async writeRecord(model, ids, values) {
+    if (!config.openG2PEnabled) {
+      return true;
+    }
+
+    const uid = await this.authenticate();
+    if (!uid) {
+      throw new Error('Authentication failed');
+    }
+
+    const recordIds = Array.isArray(ids) ? ids : [ids];
+    return await callOpenG2PRpc('object', 'execute_kw', [
+      config.openG2PDb,
+      uid,
+      config.openG2PPassword,
+      model,
+      'write',
+      [recordIds, values],
+    ]);
+  },
+
+  /**
+   * Upsert a visible fallback record by ref so repeated demo syncs update instead of duplicate.
+   */
+  async upsertVisibleFallbackRecord(values, fallbackModel = config.openG2PFallbackModel) {
+    const existing = await this.searchRead(fallbackModel, [['ref', '=', values.ref]], ['id', 'name', 'ref']);
+
+    if (existing.length > 0) {
+      await this.writeRecord(fallbackModel, existing[0].id, values);
+      return {
+        action: 'updated',
+        id: existing[0].id,
+        model: fallbackModel,
+        message: 'Updated existing visible OpenG2P fallback record.',
+      };
+    }
+
+    const id = await this.createRecord(fallbackModel, values);
+    return {
+      action: 'created',
+      id,
+      model: fallbackModel,
+      message: 'Created new visible OpenG2P fallback record.',
+    };
+  },
+
+  /**
    * Check if a specific Odoo/OpenG2P model schema exists in the system database.
    */
   async checkModelExists(model) {
@@ -167,6 +250,69 @@ export const openG2PClient = {
     } catch (error) {
       return false;
     }
+  },
+
+  /**
+   * Discover configured OpenG2P/PBMS models and recommend fallback behavior.
+   */
+  async discoverConfiguredModels() {
+    const fallbackModel = config.openG2PFallbackModel;
+
+    if (!config.openG2PEnabled) {
+      return {
+        enabled: false,
+        fallbackModel,
+        models: MODEL_DISCOVERY_TARGETS.map((target) => ({
+          key: target.key,
+          label: target.label,
+          modelName: config[target.configKey],
+          exists: false,
+          fallbackModel: target.key === 'fallback' ? null : fallbackModel,
+          recommendedAction: 'Enable OPENG2P_ENABLED=true and rerun discovery against a live OpenG2P/Odoo instance.',
+        })),
+      };
+    }
+
+    const uid = await this.authenticate();
+    if (!uid) {
+      throw new Error(DOCKER_AUTH_FAILURE_MESSAGE);
+    }
+
+    const configuredNames = [...new Set(MODEL_DISCOVERY_TARGETS.map((target) => config[target.configKey]))];
+    const rows = await callOpenG2PRpc('object', 'execute_kw', [
+      config.openG2PDb,
+      uid,
+      config.openG2PPassword,
+      'ir.model',
+      'search_read',
+      [[['model', 'in', configuredNames]]],
+      { fields: ['model', 'name'] },
+    ]);
+
+    const foundModels = new Set(rows.map((row) => row.model));
+    const fallbackExists = foundModels.has(fallbackModel);
+
+    return {
+      enabled: true,
+      fallbackModel,
+      models: MODEL_DISCOVERY_TARGETS.map((target) => {
+        const modelName = config[target.configKey];
+        const exists = foundModels.has(modelName);
+        const isFallback = target.key === 'fallback';
+        return {
+          key: target.key,
+          label: target.label,
+          modelName,
+          exists,
+          fallbackModel: isFallback || exists ? null : fallbackModel,
+          recommendedAction: exists
+            ? 'Use this configured model for live OpenG2P sync.'
+            : fallbackExists
+              ? `Model not detected. Use visible fallback model ${fallbackModel} for local demo verification.`
+              : `Model not detected and fallback model ${fallbackModel} was not detected. Install/configure OpenG2P modules or update env variables.`,
+        };
+      }),
+    };
   },
 
   /**

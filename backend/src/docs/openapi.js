@@ -222,6 +222,16 @@ export const openApiSpec = {
         responses: { 200: okResponse, 500: errorResponse },
       },
     },
+    '/api/platform-sync/eligibility/{eligibilityId}/openg2p': {
+      post: {
+        tags: ['Platform Sync'],
+        summary: 'Sync eligibility check to OpenG2P',
+        description:
+          'Syncs an eligibility check to the configured OpenG2P eligibility model, or to the visible fallback model when PBMS eligibility models are not installed.',
+        parameters: [{ name: 'eligibilityId', in: 'path', required: true, schema: { type: 'string' } }],
+        responses: { 200: okResponse, 500: errorResponse },
+      },
+    },
     '/api/platform-sync/enrollments/{enrollmentId}/openg2p': {
       post: {
         tags: ['Platform Sync'],
@@ -286,6 +296,15 @@ export const openApiSpec = {
       get: {
         tags: ['Platform Sync'],
         summary: 'Check connection to OpenG2P instance',
+        responses: { 200: okResponse, 500: errorResponse },
+      },
+    },
+    '/api/platform-sync/openg2p/models': {
+      get: {
+        tags: ['Platform Sync'],
+        summary: 'Discover configured OpenG2P model availability',
+        description:
+          'Checks configured OpenG2P/PBMS model names and reports whether each exists, which fallback model will be used, and the recommended action.',
         responses: { 200: okResponse, 500: errorResponse },
       },
     },

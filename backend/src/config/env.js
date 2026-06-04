@@ -27,6 +27,10 @@ export const config = {
   openG2PRegistrantModel: process.env.OPENG2P_REGISTRANT_MODEL || 'res.partner',
   openG2PProgramModel: process.env.OPENG2P_PROGRAM_MODEL || 'g2p.program',
   openG2PEnrollmentModel: process.env.OPENG2P_ENROLLMENT_MODEL || 'g2p.program.membership',
+  openG2PFarmModel: process.env.OPENG2P_FARM_MODEL || 'g2p.agriculture.farm',
+  openG2PCropModel: process.env.OPENG2P_CROP_MODEL || 'g2p.agriculture.crop',
+  openG2PEligibilityModel: process.env.OPENG2P_ELIGIBILITY_MODEL || 'g2p.eligibility.check',
+  openG2PFallbackModel: process.env.OPENG2P_FALLBACK_MODEL || 'res.partner',
 
   // WSO2 Config
   wso2Enabled: process.env.WSO2_ENABLED === 'true',

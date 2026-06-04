@@ -151,7 +151,7 @@ interface DemoReadiness {
         </header>
         <p class="description">Handles inventory, fertilizer and seed stock management, procurement, and reservation fulfilment.</p>
         <hr class="divider" />
-        <div class="stat-row"><strong>Base URL:</strong> <a href="http://localhost:8069" target="_blank">http://localhost:8069</a></div>
+        <div class="stat-row"><strong>Base URL:</strong> <a href="http://localhost:8070" target="_blank">http://localhost:8070</a></div>
         <div class="stat-row"><strong>Database:</strong> <span>agriregistry360</span></div>
         <div class="stat-row"><strong>Role:</strong> <span>Inventory, Fulfilment</span></div>
         <div class="stat-row"><strong>Synced:</strong> <span>{{ syncStatusData.odoo.synced + syncStatusData.odoo.demo }} records</span></div>
@@ -256,7 +256,7 @@ interface DemoReadiness {
           <div *ngFor="let step of stepResults; index as idx" style="background: var(--surface-strong); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 12px; padding: 14px;">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
               <div style="display: flex; align-items: center; gap: 12px;">
-                <span class="step-indicator" [class.success]="step.syncStatus === 'SYNCED' || step.syncStatus === 'DEMO_MODE'" [class.failed]="step.syncStatus === 'FAILED'" [class.disabled]="step.syncStatus === 'DISABLED'" style="font-weight: bold; width: 24px; height: 24px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; color: white;">
+                <span class="step-indicator" [class.success]="isSuccessfulStatus(step.syncStatus)" [class.failed]="step.syncStatus === 'FAILED'" [class.disabled]="step.syncStatus === 'DISABLED'" style="font-weight: bold; width: 24px; height: 24px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; color: white;">
                   {{ step.syncStatus === 'FAILED' ? '✗' : (step.syncStatus === 'DISABLED' ? '—' : '✓') }}
                 </span>
                 <div>
@@ -270,7 +270,7 @@ interface DemoReadiness {
                 </div>
               </div>
               <div style="display: flex; align-items: center; gap: 8px;">
-                <span class="badge" [class.verified]="step.syncStatus === 'SYNCED'" [class.pending]="step.syncStatus === 'DEMO_MODE'" [class.rejected]="step.syncStatus === 'FAILED'" [class.disabled]="step.syncStatus === 'DISABLED'">
+                <span class="badge" [class.verified]="step.syncStatus === 'SYNCED' || step.syncStatus === 'FALLBACK_SYNCED'" [class.pending]="step.syncStatus === 'DEMO_MODE'" [class.rejected]="step.syncStatus === 'FAILED'" [class.disabled]="step.syncStatus === 'DISABLED'">
                   {{ step.syncStatus }}
                 </span>
                 <button *ngIf="step.requestPayload || step.responsePayload" class="button secondary" style="min-height: 28px; padding: 2px 8px; font-size: 12px;" (click)="toggleStepPayload(idx)">
@@ -297,6 +297,33 @@ interface DemoReadiness {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+        <div *ngIf="usesOpenG2PFallback" class="message warning" style="margin-top: 14px; margin-bottom: 0;">
+          OpenG2P PBMS/agriculture models were not detected in this local container, so AgriRegistry360 writes mapped records into visible OpenG2P/Odoo records for demo verification. In production, these mappings will point to official OpenG2P PBMS models.
+        </div>
+      </div>
+    </section>
+
+    <!-- OpenG2P UI Verification -->
+    <section class="panel" style="margin-bottom: 24px; border-left: 4px solid var(--primary);">
+      <h2 style="margin-top: 0; margin-bottom: 12px;">OpenG2P UI Verification</h2>
+      <p style="color: var(--muted); font-size: 14px; margin-bottom: 12px;">
+        These records prove that AgriRegistry360 data has been pushed into the OpenG2P-compatible platform.
+      </p>
+      <div class="grid details-grid" style="grid-template-columns: 1fr 2fr; gap: 16px;">
+        <div class="detail-item">
+          <div class="detail-label">Open OpenG2P UI</div>
+          <div class="detail-value"><a href="http://localhost:8070" target="_blank">http://localhost:8070</a></div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Contacts Search Terms</div>
+          <div class="search-chip-row">
+            <code>Mohamed Ameen</code>
+            <code>FARM-LAND-0001</code>
+            <code>CROP-0001</code>
+            <code>ELIG</code>
+            <code>ENROLL</code>
           </div>
         </div>
       </div>
@@ -479,8 +506,12 @@ interface DemoReadiness {
           <span>/api/platform-sync/logs</span>
         </a>
         <a class="button secondary link-card" href="http://localhost:8069" target="_blank">
-          <strong>Local Odoo / OpenG2P UI</strong>
+          <strong>Local Odoo UI</strong>
           <span>http://localhost:8069</span>
+        </a>
+        <a class="button secondary link-card" href="http://localhost:8070" target="_blank">
+          <strong>Local OpenG2P UI</strong>
+          <span>http://localhost:8070</span>
         </a>
         <a class="button secondary link-card" href="https://localhost:9443/publisher" target="_blank">
           <strong>WSO2 APIM Publisher UI</strong>
@@ -526,13 +557,13 @@ interface DemoReadiness {
                 <td><span class="badge" style="background: var(--surface-strong); color: var(--text);">{{ log.platform }}</span></td>
                 <td><code>{{ log.targetModel || 'N/A' }}</code></td>
                 <td>
-                  <span class="badge" [class.verified]="log.syncStatus === 'SYNCED' || log.syncStatus === 'DEMO_MODE'" [class.rejected]="log.syncStatus === 'FAILED'">
+                  <span class="badge" [class.verified]="log.syncStatus === 'SYNCED' || log.syncStatus === 'FALLBACK_SYNCED'" [class.pending]="log.syncStatus === 'DEMO_MODE'" [class.rejected]="log.syncStatus === 'FAILED'">
                     {{ log.syncStatus }}
                   </span>
                 </td>
                 <td>
                   <span class="badge" [ngClass]="{
-                    'verified': log.syncStatus === 'SYNCED',
+                    'verified': log.syncStatus === 'SYNCED' || log.syncStatus === 'FALLBACK_SYNCED',
                     'pending': log.syncStatus === 'DEMO_MODE',
                     'rejected': log.syncStatus === 'FAILED'
                   }">
@@ -774,6 +805,17 @@ interface DemoReadiness {
         font-weight: bold;
         margin-bottom: 4px;
       }
+      .search-chip-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .search-chip-row code {
+        background: var(--surface-strong);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 4px 8px;
+      }
       @media (max-width: 980px) {
         .readiness-grid {
           grid-template-columns: repeat(3, 1fr);
@@ -818,7 +860,7 @@ export class PlatformSyncComponent implements OnInit {
 
   connectionBaseUrl = {
     odoo: 'http://localhost:8069',
-    openg2p: 'http://localhost:8069',
+    openg2p: 'http://localhost:8070',
     wso2: 'https://localhost:8243',
   };
 
@@ -861,6 +903,15 @@ export class PlatformSyncComponent implements OnInit {
     if (enabledCount === 3) return 'LIVE_SYNC_ENABLED';
     if (enabledCount > 0) return 'PARTIAL_SYNC';
     return 'DEMO_MODE';
+  }
+
+  get usesOpenG2PFallback(): boolean {
+    return this.stepResults.some((step) => step.syncStatus === 'FALLBACK_SYNCED') ||
+      this.logs.some((log) => log.platform === 'OPENG2P' && log.syncStatus === 'FALLBACK_SYNCED');
+  }
+
+  isSuccessfulStatus(status: string): boolean {
+    return status === 'SYNCED' || status === 'FALLBACK_SYNCED' || status === 'DEMO_MODE';
   }
 
   getReadinessColor(status: string | undefined): string {
@@ -914,9 +965,7 @@ export class PlatformSyncComponent implements OnInit {
           this.checkingConnection[platform] = false;
           this.connectionStatus[platform] = res.status;
           this.connectionMessage[platform] = res.message;
-          if (res.baseUrl) {
-            this.connectionBaseUrl[platform] = res.baseUrl;
-          }
+          this.connectionBaseUrl[platform] = this.hostFacingUrl(platform, res.baseUrl);
           this.loadReadiness();
         },
         error: (err) => {
@@ -926,6 +975,13 @@ export class PlatformSyncComponent implements OnInit {
           this.loadReadiness();
         },
       });
+  }
+
+  hostFacingUrl(platform: 'odoo' | 'openg2p' | 'wso2', baseUrl?: string): string {
+    if (platform === 'odoo') return 'http://localhost:8069';
+    if (platform === 'openg2p') return 'http://localhost:8070';
+    if (platform === 'wso2') return 'https://localhost:8243';
+    return baseUrl || '';
   }
 
   triggerDemoSync(): void {
@@ -987,11 +1043,23 @@ export class PlatformSyncComponent implements OnInit {
     if (step.step.includes('OpenG2P Agriculture Registry Extension') || step.step === 'Sync farm to OpenG2P') {
       return 'Farm mapped to OpenG2P registrant record';
     }
+    if (step.step.includes('Farm → OpenG2P visible fallback record')) {
+      return 'Farm written to visible OpenG2P/Odoo fallback record';
+    }
     if (step.step.includes('OpenG2P Agriculture Activity Extension') || step.step === 'Sync crop to OpenG2P') {
       return 'Crop logged under OpenG2P registrant';
     }
+    if (step.step.includes('Crop → OpenG2P visible fallback record')) {
+      return 'Crop written to visible OpenG2P/Odoo fallback record';
+    }
+    if (step.step.includes('Eligibility → OpenG2P visible fallback record')) {
+      return 'Eligibility written to visible OpenG2P/Odoo fallback record';
+    }
     if (step.step.includes('OpenG2P Program Enrollment') || step.step === 'Sync enrollment to OpenG2P') {
       return 'Enrollment mapped to OpenG2P program enrollment';
+    }
+    if (step.step.includes('Enrollment → OpenG2P visible fallback record')) {
+      return 'Enrollment written to visible OpenG2P/Odoo fallback record';
     }
     if (step.step.includes('Odoo Inventory Fulfilment') || step.step === 'Sync inventory reservation to Odoo') {
       return 'Inventory reservation mapped to Odoo fulfilment';
