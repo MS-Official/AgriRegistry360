@@ -4,6 +4,53 @@
 
 **AgriRegistry360** is an integrated **Farm & Farmer Registry Demo Platform** designed to demonstrate how a government or agriculture authority can manage farmers, farms, crops, eligibility, subsidy programs, and input distribution through a secure digital public infrastructure approach.
 
+## Current Implementation
+
+The current codebase starts the Farmer Registry module only. It includes:
+
+* Node.js / Express / Mongoose backend under `backend/`
+* Angular Farmer Registry frontend under `frontend/`
+* Demo planning document in `FARM_REGISTRY_DEMO_PLAN.md`
+* API test examples in `FARMER_API_TESTS.md`
+
+### Run Locally
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Create backend environment file:
+
+```bash
+cp backend/.env.example backend/.env
+```
+
+Start MongoDB locally, then run both apps:
+
+```bash
+npm run dev
+```
+
+Backend:
+
+```text
+http://localhost:5000
+```
+
+Frontend:
+
+```text
+http://localhost:4200
+```
+
+Run backend tests and Angular build:
+
+```bash
+npm test
+```
+
 This demo focuses on the client requirement for a **Farm Registry system** using:
 
 * **OpenG2P** as the registry, beneficiary, eligibility, and program management layer

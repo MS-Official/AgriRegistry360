@@ -1,0 +1,297 @@
+:root {
+  --bg: #f5f7f3;
+  --surface: #ffffff;
+  --surface-strong: #edf5e9;
+  --border: #d7dfd1;
+  --text: #172112;
+  --muted: #60705a;
+  --primary: #256f3a;
+  --primary-strong: #174b28;
+  --danger: #b3261e;
+  --warning: #8a5b00;
+  --success: #1f7a3a;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+a {
+  color: inherit;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+.shell {
+  min-height: 100vh;
+}
+
+.topbar {
+  align-items: center;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  gap: 24px;
+  justify-content: space-between;
+  padding: 14px 28px;
+}
+
+.brand {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.nav a {
+  border-radius: 6px;
+  color: var(--muted);
+  font-size: 14px;
+  padding: 8px 10px;
+  text-decoration: none;
+}
+
+.nav a.active {
+  background: var(--surface-strong);
+  color: var(--primary-strong);
+}
+
+.content {
+  margin: 0 auto;
+  max-width: 1280px;
+  padding: 28px;
+}
+
+.page-title {
+  align-items: flex-start;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.page-title h1 {
+  font-size: 28px;
+  margin: 0 0 6px;
+}
+
+.page-title p {
+  color: var(--muted);
+  margin: 0;
+}
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.grid {
+  display: grid;
+  gap: 16px;
+}
+
+.form-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.field {
+  display: grid;
+  gap: 6px;
+}
+
+.field label {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.field input,
+.field select {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  min-height: 42px;
+  padding: 9px 10px;
+  width: 100%;
+}
+
+.field .error {
+  color: var(--danger);
+  font-size: 12px;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.button {
+  align-items: center;
+  background: var(--primary);
+  border: 1px solid var(--primary);
+  border-radius: 6px;
+  color: white;
+  cursor: pointer;
+  display: inline-flex;
+  min-height: 38px;
+  padding: 8px 12px;
+  text-decoration: none;
+}
+
+.button.secondary {
+  background: white;
+  border-color: var(--border);
+  color: var(--text);
+}
+
+.button.danger {
+  background: var(--danger);
+  border-color: var(--danger);
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.message {
+  border-radius: 6px;
+  margin-bottom: 16px;
+  padding: 10px 12px;
+}
+
+.message.success {
+  background: #e7f5ea;
+  color: var(--success);
+}
+
+.message.error {
+  background: #fdebea;
+  color: var(--danger);
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+table {
+  border-collapse: collapse;
+  min-width: 980px;
+  width: 100%;
+}
+
+th,
+td {
+  border-bottom: 1px solid var(--border);
+  padding: 12px 10px;
+  text-align: left;
+  vertical-align: top;
+}
+
+th {
+  color: var(--muted);
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.badge {
+  border-radius: 999px;
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 8px;
+}
+
+.badge.pending {
+  background: #fff4d8;
+  color: var(--warning);
+}
+
+.badge.verified {
+  background: #e7f5ea;
+  color: var(--success);
+}
+
+.badge.rejected {
+  background: #fdebea;
+  color: var(--danger);
+}
+
+.details-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.detail-item {
+  border-bottom: 1px solid var(--border);
+  padding: 8px 0 12px;
+}
+
+.detail-label {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.detail-value {
+  margin-top: 4px;
+}
+
+.placeholder-grid {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  margin-top: 18px;
+}
+
+.placeholder {
+  background: var(--surface-strong);
+  border: 1px dashed #b8c8ae;
+  border-radius: 8px;
+  min-height: 96px;
+  padding: 14px;
+}
+
+.placeholder strong {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.placeholder span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+@media (max-width: 860px) {
+  .topbar,
+  .page-title {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .content {
+    padding: 18px;
+  }
+
+  .form-grid,
+  .details-grid,
+  .placeholder-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
